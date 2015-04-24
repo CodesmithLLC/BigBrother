@@ -1,0 +1,21 @@
+{
+  "name": "CodeSmith-BigBrother",
+  "version": "1.0.0",
+  "description": "",
+  "main": "big-brother.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
+  "license": "ISC",
+  "dependencies": {
+    "c3": "^0.4.10",
+    "git-emit": "0.0.0",
+    "node-notifier": "^4.2.1",
+    "nodegit": "^0.3.3",
+    "open": "0.0.5",
+    "redis-eventemitter": "^1.0.1",
+    "simple-git": "^1.2.0",
+    "socket.io-client": "^1.3.5"
+  }
+}

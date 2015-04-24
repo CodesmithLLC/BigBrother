@@ -1,0 +1,18 @@
+{
+  "db":{
+    "url" : "mongodb://nmandel:backmassage4@ds031271.mongolab.com:31271/icecommusers"
+  },
+  "http":{
+    "port": 8123,
+    "ip": ""
+  },
+  "user":{
+    "session_secret": "icecommsecret"
+  },
+  "redis":{
+    "port": 6379,
+    "host": "127.0.0.1",
+    "prefix": "production:",
+    "auth_pass": "mypassword"
+  }
+}
