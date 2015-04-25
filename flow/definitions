@@ -1,0 +1,15 @@
+Right now its
+-Central Command-The control between Watchers and Citizens
+-Watchers-People that read the data and can offer assistance
+-Citizen-People that are watched and can ask for help
+
+Both Citizen and Watcher have
+-Login-The first thing they will see
+
+Citizen will have
+-Snitcher-Sends all information about user activity to Central Command
+-Services-Interface for the student to ask for help
+
+Watcher has
+-Analyzer-Recieves information from central command
+-Duty-notifies Watcher of help

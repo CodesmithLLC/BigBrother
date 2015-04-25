@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "c3": "^0.4.10",
+    "diff-parse": "0.0.13",
     "git-emit": "0.0.0",
     "node-notifier": "^4.2.1",
     "nodegit": "^0.3.3",

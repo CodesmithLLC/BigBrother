@@ -1,0 +1,30 @@
+1){
+  Citizen Logs in to Services
+  -Services tries to access little helper
+    -If there is no little helper locally
+      -Services notifies Citizen
+        -To continue, please cd to a git repository and start the little helper
+    -else Go to 2
+
+  Citizen starts up LittleHelper
+  -LittleHelper needs login credentials
+  --Wait 30 seconds
+    -If no Services Page tries to access self-Open up a browser window to Services
+    -else->Go to 2
+}
+
+2){
+  Services requests for littleHelper credentials from Central Command
+  Services Provides the local little helper with credentials
+  Little helper accesses Central Command with Credentials
+  Go to 3
+}
+
+3){
+  Little Helper Listens for when a commit or file change happens
+    -Sends Raw Data to Central Command
+  Services waits for a help request
+    -Notifies central command
+  When help is comming
+    -Notify Locally
+}

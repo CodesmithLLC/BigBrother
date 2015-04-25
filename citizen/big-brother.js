@@ -7,6 +7,7 @@
 
 */
 var CentralCommand = require("./CentralCommand");
+var
 
 
 var app = require("express")();
@@ -14,11 +15,11 @@ var app = require("express")();
 var notifier = require('node-notifier');
 var path = require('path');
 
- 
+
 var user;
 
 app.get("/",function(){
-	
+
 });
 
 app.get("login",function(current_user){
@@ -31,7 +32,7 @@ app.get("login",function(current_user){
 		});
 	});
 });
- 
+
 app.get("logout",function(){
 	user = void(0);
   CentralCommand.post("/logout", function(){
@@ -42,7 +43,7 @@ app.get("logout",function(){
 		});
 	});
 });
- 
+
 app.get("help", function(request){
   if(!user) return;
   CentralCommand.get("/helpRequest", request, function(help){
@@ -63,7 +64,7 @@ app.get("help", function(request){
     }
   });
 });
- 
+
 
 
 /*
@@ -71,14 +72,14 @@ app.get("help", function(request){
 
 //https://github.com/arvydas/node-hid/tree/develop
 var kbs = checkForAvailableKeyboards();
- 
+
 kbs.forEach(function(kb){
   kb.on("stroke", function(){
     kb.apmUpdate(); //pretty difficult
     kb.lastStroke = Date.now();
   });
 })
- 
+
 setInterval(function(){
   var main_and_helper = findCurrentMainAndHelper(kbs);
   if(main_and_helper.helper.lastInteraction() > 30*1000*60){

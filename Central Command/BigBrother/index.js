@@ -8,13 +8,6 @@ var Commit = require("../Models/Commit");
 
 CentralCommand.on("connect",function(ws){
   ioRouter(ws);
-  ws.on("login",function(req,res){
-
-  });
-
-  ws.on("logout",function(req,res){
-
-  });
 
   ws.on("commit-add",function(commit){
     Commit.createFromObject(ws.user,commit);

@@ -11,7 +11,7 @@ client.on('connect', function(){
 });
 
 client.on('event', function(data){
-	
+
 });
 
 client.on('disconnect', function(){
@@ -20,8 +20,6 @@ client.on('disconnect', function(){
 
 
 function connectAs(user){
-	s
 }
 
 module.exports = client;
-

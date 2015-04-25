@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 
 var userSchema = mongoose.Schema({
   username: { type: String, required: true, unique: true },
+  role:{type:String,required:true},
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true},
   apiKey: {type: String},
@@ -18,6 +19,26 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
     cb(null, isMatch);
   });
 };
+
+// Password verification
+userSchema.methods.createToken = function(cb) {
+  var now = Date.now();
+  //This obviously will change, and if it doesn't, its easy to fake
+  cb(void(0), this._id + "_" + now);
+};
+
+userSchema.statics.userFromToken = function(token,cb){
+  token = token.split("_");
+  if(parseInt(token[1]) + 5000 < Date.now()){
+    return next("timeout");
+  }
+  this.findOne({_id:token[0]},function(err,user){
+    if(err) return next(err);
+    if(!user) return next("Not Found");
+    next(void(0),user);
+  });
+};
+
 
 userSchema.pre('save', function(next) {
   console.log('inside save method');
