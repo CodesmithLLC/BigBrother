@@ -1,0 +1,23 @@
+{
+  "name": "BigBrother",
+  "version": "0.5.0",
+  "description": "Watches files and commits and sends it to a server",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "chokidar": "^1.0.1",
+    "git-emit": "0.0.0",
+    "node-notifier": "^4.2.1",
+    "open": "0.0.5",
+    "rimraf": "^2.3.2",
+    "simple-git": "^1.2.0",
+    "socket.io": "^1.3.5",
+    "socket.io-client": "^1.3.5"
+  },
+  "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
+  "license": "ISC"
+}

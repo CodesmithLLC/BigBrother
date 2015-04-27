@@ -1,64 +1,88 @@
 //https://github.com/substack/node-git-emit/issues/2
-
 var fs = require("fs");
-var CentralCommand = require("./CentralCommand");
 var testRunner = require("./testrunner");
 var simpleGit = require("simple-git");
 var chokidar = require("chokidar");
-
 var child_process = require("child_process");
-var subject = child_process.execSync("git config --get remote.origin.url").toString("utf8");
-if(!subject) throw new Error("Big Brother should be run from within a git repository");
+var pathutil = require("path");
+var gitEmit = require("git-emit");
+var EE = require("events").EventEmitter;
 
 
-var gd = process.cwd();
-gd = gd+"/.git";
-if(!fs.statSync(gd).isDirectory()){
-	throw new Error("Big brother should be started in a git repository");
+function Snitcher(path){
+	if(!(this instanceof Snitcher)) return new Snitcher(path);
+	EE.call(this);
+	var subject = child_process.execSync(
+		"git config --get remote.origin.url",{cwd:path}
+	).toString("utf8");
+	if(!subject) throw new Error("Big Brother should be run from within a git repository");
+	this.subject = subject;
+	this.path = pathutil.resolve(path);
+	this.gdir = pathutil.resolve(path+"/.git");
+	if(!fs.statSync(this.gdir).isDirectory()){
+		throw new Error("Big brother should be started in a git repository");
+	}
 }
 
-var ghan = simpleGit(gd);
-var gee = gitEmit(cwd+"/.git", cb);
-gee.on("post-commit",function(){
-	ghan.diff(function(err,diff){
-		testRunner.run(function(test_res){
-			CentralCommand.send("commit",{
-				subject:subject,
-				diff:diff,
-				test:test_res
+Snitcher.prototype = Object.create(EE.prototype);
+Snitcher.prototype.constructor = Snitcher;
+
+Snitcher.prototype.start = function(next){
+	console.log("started");
+	var self = this;
+	this.git_handle = simpleGit(this.path);
+	this.git_ee = gitEmit(this.gdir,console.error.bind(console));
+	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]*\.\w$|[\/\\]node_modules/});
+
+	this.git_ee.on("post-commit",function(){
+		console.log(arguments);
+		self.git_handle.diff(function(err,diff){
+			testRunner(self.path,function(test_res){
+				self.emit("commit",{
+					subject:self.subject,
+					diff:diff,
+					test:test_res
+				});
 			});
 		});
 	});
-});
 
-var gwat = chokidar.watch('.', {ignored: /[\/\\]\./})
-.on('add', function(path) {
-	testRunner.run(function(test_res){
-		CentralCommand.emit("fsdiff",{
-			subject:subject,
-			diff:"add-file",
-			path:path,
-			test:test_res
+	this.fs_watch.on('add', function(path) {
+		testRunner(self.path,function(test_res){
+			self.emit("fsdiff",{
+				subject:self.subject,
+				diff:"fs-add",
+				path:path,
+				test:test_res
+			});
 		});
-	});
-}).on('change', function(path) {
-	ghan.diff("HEAD "+path,function(err,diff){
-		testRunner.run(function(test_res){
-			CentralCommand.emit("fsdiff",{
-				subject:subject,
-				diff:diff,
+	}).on('change', function(path) {
+		self.git_handle.diff("HEAD "+path,function(err,diff){
+			testRunner(self.path,function(test_res){
+				self.emit("fsdiff",{
+					subject:self.subject,
+					diff:diff,
+					path:path,
+					test:test_res
+				});
+			});
+		});
+	}).on('unlink', function(path) {
+		testRunner(self.path,function(test_res){
+			self.emit("fsdiff",{
+				subject:self.subject,
+				diff:"fs-rem",
 				path:path,
 				test:test_res
 			});
 		});
 	});
-}).on('unlink', function(path) {
-	testRunner.run(function(test_res){
-		CentralCommand.send("fsdiff",{
-			subject:subject,
-			diff:"rem-file",
-			path:path,
-			test:test_res
-		});
-	});
-});
+	setImmediate(next);
+};
+
+Snitcher.prototype.close = function(){
+	this.git_ee.close();
+	this.fs_watch.close();
+};
+
+module.exports = Snitcher;
