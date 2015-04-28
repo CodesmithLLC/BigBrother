@@ -28,16 +28,15 @@ Snitcher.prototype = Object.create(EE.prototype);
 Snitcher.prototype.constructor = Snitcher;
 
 Snitcher.prototype.start = function(next){
-	console.log("started");
 	var self = this;
 	this.git_handle = simpleGit(this.path);
-	this.git_ee = gitEmit(this.gdir,console.error.bind(console));
-	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]*\.\w$|[\/\\]node_modules/});
+	this.git_ee = gitEmit(this.gdir);
+	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]\.|[\/\\]node_modules/});
 
 	this.git_ee.on("post-commit",function(){
-		console.log(arguments);
 		self.git_handle.diff(function(err,diff){
-			testRunner(self.path,function(test_res){
+			testRunner(self.path,function(err,test_res){
+				if(err) self.emit("error",err);
 				self.emit("commit",{
 					subject:self.subject,
 					diff:diff,
@@ -48,7 +47,8 @@ Snitcher.prototype.start = function(next){
 	});
 
 	this.fs_watch.on('add', function(path) {
-		testRunner(self.path,function(test_res){
+		testRunner(self.path,function(err,test_res){
+			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				diff:"fs-add",
@@ -58,7 +58,8 @@ Snitcher.prototype.start = function(next){
 		});
 	}).on('change', function(path) {
 		self.git_handle.diff("HEAD "+path,function(err,diff){
-			testRunner(self.path,function(test_res){
+			testRunner(self.path,function(err,test_res){
+				if(err) self.emit("error",err);
 				self.emit("fsdiff",{
 					subject:self.subject,
 					diff:diff,
@@ -68,7 +69,8 @@ Snitcher.prototype.start = function(next){
 			});
 		});
 	}).on('unlink', function(path) {
-		testRunner(self.path,function(test_res){
+		testRunner(self.path,function(err,test_res){
+			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				diff:"fs-rem",

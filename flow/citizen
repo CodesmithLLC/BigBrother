@@ -14,7 +14,7 @@
 }
 
 2){
-  Services requests for littleHelper credentials from Central Command
+  Services requests on behalf of littleHelper from Central Command
   Services Provides the local little helper with credentials
   Little helper accesses Central Command with Credentials
   Go to 3
@@ -26,5 +26,5 @@
   Services waits for a help request
     -Notifies central command
   When help is comming
-    -Notify Locally
+    -Notify Locally in browser
 }

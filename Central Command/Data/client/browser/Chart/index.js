@@ -29,9 +29,11 @@ Chart.prototype.initialize = require("./initialize");
 
 Chart.prototype.changeClassRoom = function(newclassroom){
   var self = this;
-  this.chart.unload({
-    ids: this.currentClassRoom.getKeys()
-  });
+  if(this.currentClassRoom){
+    this.chart.unload({
+      ids: this.currentClassRoom.getKeys()
+    });
+  }
   this.studentContain.clear();
   new Promise(function(){
     if(!(newclassroom in self.availableClassRooms)){

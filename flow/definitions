@@ -13,3 +13,10 @@ Citizen will have
 Watcher has
 -Analyzer-Recieves information from central command
 -Duty-notifies Watcher of help
+
+
+
+Bigbrother-Serverside for the sudent
+StudentPortal-ClientSide for the student from master server
+MasterServer-THe main server that does the restful stuff
+TAPortal-Visualizes the data from master server
