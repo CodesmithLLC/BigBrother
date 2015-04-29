@@ -7,6 +7,7 @@ var child_process = require("child_process");
 var pathutil = require("path");
 var gitEmit = require("git-emit");
 var EE = require("events").EventEmitter;
+var snapshot = require("./snapshot");
 
 
 function Snitcher(path){
@@ -80,6 +81,15 @@ Snitcher.prototype.start = function(next){
 		});
 	});
 	setImmediate(next);
+};
+
+Snitcher.prototype.snapshotStream = function(){
+	BIG_BROTHER.get("subject",function(subject){
+		MASTER_SERVER.get("help",{description:description},function(err,helpid){
+			BIG_BROTHER.emit("help/send-snapshot",{helpid:helpid,subject:subject});
+		});
+	});
+	return snapshot(this.path);
 };
 
 Snitcher.prototype.close = function(){

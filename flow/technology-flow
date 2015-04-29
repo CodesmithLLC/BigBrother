@@ -1,0 +1,10 @@
+
+help request
+-Student Portal->Student Monitor
+  -Sends description from form data
+-Student Monitor->Master Server
+  -Sends subject from current working directory
+  -Sends description, piped from the student request
+  -Sends Snapshot-As tar
+-Master Server->Storage, Notifications
+  -

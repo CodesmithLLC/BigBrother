@@ -12,11 +12,11 @@ var async = require("async");
 var authorized = false;
 
 //globals here are fine
-var CentralCommand, CitizenListener, snitcher;
+var MASTER_SERVER, STUDENT_PORTAL_LISTENER, snitcher;
 
 async.parallel([
-	connectToCentralCommand,
-	createCitizenListener,
+	connectToMASTER_SERVER,
+	createSTUDENT_PORTAL_LISTENER,
 	listenToStartASnitcher
 //	startOurSnitcher,
 ],function(err){
@@ -24,38 +24,41 @@ async.parallel([
 });
 
 
-function connectToCentralCommand(next){
+function connectToMASTER_SERVER(next){
 	var EE = require("events").EventEmitter;
- CentralCommand = new EE();
-//	CentralCommand = require('socket.io-client')(big_brother_url);
+ MASTER_SERVER = new EE();
+//	MASTER_SERVER = require('socket.io-client')(big_brother_url);
 
 	var cl,el;
-	CentralCommand.once('connect', cl = function(){
-		CentralCommand.removeListener('error',el);
+	MASTER_SERVER.once('connect', cl = function(){
+		MASTER_SERVER.removeListener('error',el);
 		next();
 	});
-	CentralCommand.once('error', el = function(e){
-		CentralCommand.removeListener('error',cl);
+	MASTER_SERVER.once('error', el = function(e){
+		MASTER_SERVER.removeListener('error',cl);
 		next(e);
 	});
 }
 
-function createCitizenListener(next){
+function createSTUDENT_PORTAL_LISTENER(next){
 	var express = require("express");
-	CitizenListener = express();
-	CitizenListener.post("/authorize",function(req,res){
-		CentralCommand.emit("authorize",req.body.token);
+	STUDENT_PORTAL_LISTENER = express();
+	STUDENT_PORTAL_LISTENER.post("/authorize",function(req,res){
+		MASTER_SERVER.emit("authorize",req.body.token);
 		authorized = true;
 	});
 
-	CitizenListener.use(express.static("./test_tools"));
+	STUDENT_PORTAL_LISTENER.use(express.static("./test_tools"));
+	STUDENT_PORTAL_LISTENER.get("/send-help-request",function(req,res){
+		MASTER_SERVER.requestHelp(snitcher.getSnapshot(req),res);
+	});
 
-	CentralCommand.on("authorize-error",function(e){
+	MASTER_SERVER.on("authorize-error",function(e){
 		console.error(e);
 		authorized = false;
 	});
 
-	CitizenListener.listen(8001);
+	STUDENT_PORTAL_LISTENER.listen(8001);
 }
 
 function listenToStartASnitcher(next){
@@ -74,10 +77,10 @@ function listenToStartASnitcher(next){
 		buffer = dir[1];
 		snitcher = new (require("./snitcher"))(dir);
 		snitcher.on("commit",function(commit){
-			CentralCommand.send("commit",commit);
+			MASTER_SERVER.send("commit",commit);
 		});
 		snitcher.on("fsdiff",function(diff){
-			CentralCommand.emit("fsdiff",diff);
+			MASTER_SERVER.emit("fsdiff",diff);
 		});
 		snitcher.start();
 	});
@@ -87,10 +90,10 @@ function listenToStartASnitcher(next){
 function startOurSnitcher(next){
 	snitcher = new (require("./snitcher"))(process.cwd());
 	snitcher.on("commit",function(commit){
-		CentralCommand.send("commit",commit);
+		MASTER_SERVER.send("commit",commit);
 	});
 	snitcher.on("fsdiff",function(diff){
-		CentralCommand.emit("fsdiff",diff);
+		MASTER_SERVER.emit("fsdiff",diff);
 	});
 	snitcher.start(next);
 }
