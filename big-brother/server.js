@@ -26,7 +26,7 @@ async.parallel([
 
 function connectToMASTER_SERVER(next){
 	var EE = require("events").EventEmitter;
- MASTER_SERVER = new EE();
+	MASTER_SERVER = new EE();
 //	MASTER_SERVER = require('socket.io-client')(big_brother_url);
 
 	var cl,el;
@@ -49,9 +49,7 @@ function createSTUDENT_PORTAL_LISTENER(next){
 	});
 
 	STUDENT_PORTAL_LISTENER.use(express.static("./test_tools"));
-	STUDENT_PORTAL_LISTENER.get("/send-help-request",function(req,res){
-		MASTER_SERVER.requestHelp(snitcher.getSnapshot(req),res);
-	});
+	STUDENT_PORTAL_LISTENER.get("/send-help-request",require("help-request"));
 
 	MASTER_SERVER.on("authorize-error",function(e){
 		console.error(e);
