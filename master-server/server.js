@@ -1,6 +1,8 @@
 var express = require("express"),
   app = express(),
+  SIO = require("socket.io"),
   server = require("http").Server(app),
+  io = SIO(server),
   user = void(0);
 //	REE = require('redis-eventemitter');
 
@@ -24,7 +26,7 @@ async.applyEachSeries(
     //Ensure our server is up and running
     setupServer
   ],
-  require("./server/config"),
+  require("./config"),
   function(err){
     if(err) throw err;
     console.log("Server Ready");
@@ -50,11 +52,13 @@ function connectDatabase(config,next){
   };
   mongoose.connection.once( "error", erlist);
   mongoose.connection.once( "open", oplist);
+  //This is replacing the cluster EventEmitter for now
+  mongoose.ee = new require("events").EventEmitter();
 }
 
 
 function connectToClusterEE(config,next){
-	global.clusterEE = new EE();
+  next();
 /*
   we're going to want to bind this to either redis or through node.
   for now it doesn't matter
@@ -82,7 +86,7 @@ function setupUser(config,next){
 function registerRoutes(config,next){
   // ties apikey with user
   app.use(user.middleware.http);
-  app.use(user.router.http);
+  app.use(user.router);
 
   app.get("/",function(req,res,next){
     if(!req.user) return res.redirect("/login");
@@ -91,13 +95,9 @@ function registerRoutes(config,next){
     next();
   });
 
-	var BigBrother = require("./BigBrother");
-	var Data = require("./Data");
-  BigBrother.use(user.middleware.io);
-  Data.use(user.middleware.io);
-
-	BigBrother.atttachMe.attach(http,{path:"/bigbrother"});
-	Data.attachMe.attach(http,{path:"/data-analysis"});
+  io.use(user.middleware.io);
+  io.of("/bigbrother").on("connect",require("./student-monitor"));
+  io.of("/help-analysis").on("connect",require("./help-request"));
 
   app.use(require("./Abstract/mongooseRouter"));
   next();
@@ -109,6 +109,3 @@ function setupServer(config,next){
     next();
   });
 }
-
-
-var server = http.createServer(app);

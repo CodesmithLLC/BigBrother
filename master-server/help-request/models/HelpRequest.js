@@ -1,15 +1,17 @@
 var mongoose = require("mongoose");
 
 var schema = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
+  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
+  ta: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
   description:String,
   snapshot: {type: mongoose.Schema.Types.ObjectId, ref:"SnapShot"},
-  taken: Boolean
+  taken: {type:Boolean, default:false},
+  solved: {type:Boolean, default:false}
 });
 
 schema.statics.fromObject = function(help_request,obj,next){
   this.create({
-    user:help_request.user,
+    student:help_request.user,
     help_request:help_request,
     subject:help_request.subject,
     raw:obj
@@ -25,6 +27,10 @@ schema.statics.Permission = function(req,next){
     return next(req.user.permissions.indexOf("student") !== -1);
   }
   return next(false);
+};
+
+schema.statics.defaultCreate = function(req){
+  return {student:req.user};
 };
 
 

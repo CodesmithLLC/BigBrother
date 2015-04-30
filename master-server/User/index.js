@@ -12,7 +12,7 @@ module.exports = function(config,next){
 
 
 function upsertStudent(next){
-  var p = Math.random().toString(64).substring(2);
+  var p = Math.random().toString(36).substring(2);
   var u = new U({
     permissions: ["student"],
     email: "fake@email.com",
@@ -28,7 +28,7 @@ function upsertStudent(next){
 }
 
 function upsertTA(next){
-  var p = Math.random().toString(64).substring(2);
+  var p = Math.random().toString(36).substring(2);
   var u = new U({
     permissions: ["teachers_assistant"],
     email: "fake@email.com",
