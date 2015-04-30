@@ -4,12 +4,9 @@ var mongoose = require('mongoose');
 
 var userSchema = mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  role:{type:String,required:true},
+  roles: [String],
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true},
-  apiKey: {type: String},
-  url: {type: String, default: ""},
-  user_limit: {type: Number, default: 1000}
 });
 
 // Password verification

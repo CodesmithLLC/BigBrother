@@ -1,4 +1,3 @@
-Use Cases
-
--Tas have their own classroom
--Admins have access to all
+User Logs in
+-If user is Ta-Redirect to TA portal
+-If user is student-Redirect to Student Portal

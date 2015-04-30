@@ -1,0 +1,23 @@
+{
+  "name": "big-brother-master-server",
+  "version": "0.0.1",
+  "description": "Stores the information sent from big-brother instances and provides ways for  users to view the information",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
+  "license": "ISC",
+  "dependencies": {
+    "c3": "^0.4.10",
+    "diff-parse": "0.0.13",
+    "async": "^0.9.0",
+    "browserify": "^9.0.8",
+    "express": "^4.12.3",
+    "mongoose": "^4.0.2",
+    "socket.io": "^1.3.5",
+    "superagent": "^1.2.0",
+    "tar-parse": "0.0.2"
+  }
+}

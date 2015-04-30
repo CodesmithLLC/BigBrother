@@ -1,0 +1,5 @@
+1) Permissions should be defined in its own area. The reason for this is the ability
+to set custom permissions and store them in the database instead of having them on
+a per model basis. In the event one of these models may be used elsewhere with
+different permissions, this currently would have be done on the developer side rather than
+on the client side

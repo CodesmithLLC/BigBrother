@@ -9,8 +9,6 @@
   "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
   "license": "ISC",
   "dependencies": {
-    "c3": "^0.4.10",
-    "diff-parse": "0.0.13",
     "redis-eventemitter": "^1.0.1",
     "nodegit": "^0.3.3",
   }

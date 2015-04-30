@@ -1,6 +1,7 @@
 var express = require("express"),
-userController = require('./userController'),
+userModel = require("./UserModel"),
 passport = require("./passport.config.js");
+
 
 var app = express.Router();
 
@@ -12,9 +13,9 @@ app.get("/login",function(req,res,next){
   res.sendFile("./login.html");
 });
 
-app.post('/login', passport.authenticate('local-login'),function(req,res){
+app.post('/login', passport.authenticate('local-login'),function(req,res,next){
     console.log('in login', req.user);
-    res.send(req.user);
+    next();
 });
 
 // API-style endpoint for checking if logged in on all pages
@@ -28,11 +29,6 @@ app.post('/logout', function(req, res){
     res.redirect('/login');
 });
 
-//==================== Signup routes ============================
-
-app.post('/checkUsernameExists', userController.checkUsernameExists);
-
-app.post('/checkEmailExists', userController.checkEmailExists);
 
 app.post('/signup', passport.authenticate('local-signup'),function(req,res){
     console.log('inside signup');

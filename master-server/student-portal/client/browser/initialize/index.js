@@ -1,7 +1,10 @@
+var sa = require("superagent");
+
 window.BIG_BROTHER = void(0);
 window.local_big_brother_url = "http://localhost:"+big_brother_port;
 window.on("load",function(){
-  MASTER_SERVER.get("authtoken",function(err,token){
+  sa.get("/authtoken",function(err,token){
+    if(err)
     var notified = 0;
     var poller = function(){
       ajax.post(local_big_brother_url,{token:token},function(err,ok){
