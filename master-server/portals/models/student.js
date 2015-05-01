@@ -20,4 +20,4 @@ userSchema.pre('save', function(next) {
 });
 
 // Change when releasing/ clear DB before
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Student', userSchema);

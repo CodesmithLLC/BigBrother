@@ -96,8 +96,8 @@ function registerRoutes(config,next){
   });
 
   io.use(user.middleware.io);
-  io.of("/bigbrother").on("connect",require("./student-monitor"));
-  io.of("/help-analysis").on("connect",require("./help-request"));
+  io.of("/bigbrother").on("connect",require("./student-monitor/ws.js"));
+//  io.of("/help-analysis").on("connect",require("./help-request/ws.js"));
 
   app.use(require("./Abstract/mongooseRouter"));
   next();

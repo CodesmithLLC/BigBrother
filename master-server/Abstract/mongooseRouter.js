@@ -92,6 +92,7 @@ router.post("/:classname",function(req,res){
     fin(void(0),{});
   }
 });
+
 router.post("/:classname/:method",function(req,res){
   req.mClass[req.params.method](req.body,function(err,ret){
     if(err) return next(new Error(err));
@@ -103,6 +104,7 @@ router.post("/:classname/:method",function(req,res){
     res.status(200).send(ret);
   });
 });
+
 router.post("/:classname/:id/:method",function(req,res){
   req.doc[req.params.method](req.body,function(err,doc){
     if(err) return next(new Error(err));
@@ -115,4 +117,4 @@ router.post("/:classname/:id/:method",function(req,res){
   });
 });
 
-exports.router = router;
+module.exports = router;

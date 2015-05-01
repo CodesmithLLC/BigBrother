@@ -3,10 +3,14 @@ var sa = require('superagent');
 
 var big_brother_url = "";
 
-var authorized = false;
+var authtoke = void(0)
 var io;
 
 //The purpose for this is generally to make sure any calls have auth headers
+module.exports.authorize = function(token){
+  authtoke = token;
+};
+
 
 module.exports.initialize = function(){
   var EE = require("events").EventEmitter;
@@ -25,8 +29,7 @@ module.exports.initialize = function(){
 };
 
 module.exports.requestHelp = function(subject,description,snapshot,next){
-  var req = MASTER_SERVER
-    .post(big_brother_url+"/help-request")
+  var req = sa.post(big_brother_url+"/help-request")
     .field("subject",subject)
     .field("description",description);
   var snappart = req.part().type('application/x-tar')
@@ -38,7 +41,7 @@ module.exports.requestHelp = function(subject,description,snapshot,next){
 
 module.exports.sendCommit = function(commit){
   var req = MASTER_SERVER
-    .post(big_brother_url+"/FSDiff")
+    .post(big_brother_url+"/Commit")
     .field("subject",commit.subject)
     .field("commitMessage",commit.message);
   var testpart = req.part().type('text/plain')
