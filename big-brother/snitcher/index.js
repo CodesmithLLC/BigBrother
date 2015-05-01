@@ -7,7 +7,6 @@ var cp = require("child_process");
 var pathutil = require("path");
 var gitEmit = require("git-emit");
 var EE = require("events").EventEmitter;
-var snapshot = require("./snapshot");
 
 
 function Snitcher(path){
@@ -35,14 +34,14 @@ Snitcher.prototype.start = function(next){
 	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]\.|[\/\\]node_modules/});
 
 	this.git_ee.on("post-commit",function(){
-		self.git_handle.diff(function(err,diff){
-			testRunner(self.path,function(err,test_res){
-				if(err) self.emit("error",err);
-				self.emit("commit",{
-					subject:self.subject,
-					diff:diff,
-					test:test_res
-				});
+		var diff = cp.fork("git diff HEAD^");
+		diff.on("error",console.error.bind(console));
+		testRunner(self.path,function(err,test_res){
+			if(err) self.emit("error",err);
+			self.emit("commit",{
+				subject:self.subject,
+				diff:diff.stdout,
+				test:test_res
 			});
 		});
 	});
@@ -59,7 +58,7 @@ Snitcher.prototype.start = function(next){
 		});
 	}).on('change', function(path) {
 		var diff = cp.fork("git diff HEAD "+path);
-		cp.on("error",console.error.bind(console));
+		diff.on("error",console.error.bind(console));
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{

@@ -13,7 +13,7 @@ module.exports = function(path,next){
     });
     return tar.pack(path,{
       ignore:function(name){
-        globMatches.some(function(fn){
+        return globMatches.some(function(fn){
           return fn(name);
         });
       }
