@@ -35,7 +35,7 @@ router.use(["/:classname","/:classname/*"],function(req,res,next){
     next();
   });
 });
-router.get("/:classname",function(req,res){
+router.get("/:classname",function(req,res,next){
   var ipp = 10;
   if(req.query.ipp){
     ipp = delete req.query.ipp;
@@ -44,13 +44,20 @@ router.get("/:classname",function(req,res){
   if(req.query.sort){
     sort = delete req.query.sort;
   }
-  var search = req.mClass.defaultSearch?req.mClass.defaultSearch(req):{};
-  _.merge(search,req.query||{});
-  req.mClass.find(search).limit(ipp).sort(sort).exec(function(err,docs){
+  var fin = function(err,search){
     if(err) return next(err);
-    var l = docs.length;
-    res.send(docs);
-  });
+    _.merge(search,req.query||{});
+    req.mClass.find(search).limit(ipp).sort(sort).exec(function(err,docs){
+      if(err) return next(err);
+      var l = docs.length;
+      res.send(docs);
+    });
+  };
+  if(req.mClass.defaultSearch){
+    req.mClass.defaultSearch(req,fin);
+  }else{
+    fin(void(0),{});
+  }
 });
 router.get("/:classname/:id",function(req,res,next){
   res.status(200).send(req.doc.toObject());
@@ -70,13 +77,20 @@ router.put("/:classname/:id",function(req,res){
   });
 });
 router.post("/:classname",function(req,res){
-  var create = req.mClass.defaultCreate?req.mClass.defaultCreate(req):{};
-  _.merge(create,req.body||{});
-  req.mClass.create(req.body,function(err,doc){
-    if(err) return next(new Error(err));
-    if(!doc) return res.status(404).end();
-    res.redirect(201, req.params.classname+"/"+doc._id);
-  });
+  var fin = function(err,create){
+    if(err) return next(err);
+    _.merge(create,req.body||{});
+    req.mClass.create(req.body,function(err,doc){
+      if(err) return next(new Error(err));
+      if(!doc) return res.status(404).end();
+      res.redirect(201, req.params.classname+"/"+doc._id);
+    });
+  };
+  if(req.mClass.defaultCreate){
+    req.mClass.defaultCreate(req,fin);
+  }else{
+    fin(void(0),{});
+  }
 });
 router.post("/:classname/:method",function(req,res){
   req.mClass[req.params.method](req.body,function(err,ret){

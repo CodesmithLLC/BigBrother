@@ -3,7 +3,7 @@ var fs = require("fs");
 var testRunner = require("./testrunner");
 var simpleGit = require("simple-git");
 var chokidar = require("chokidar");
-var child_process = require("child_process");
+var cp = require("child_process");
 var pathutil = require("path");
 var gitEmit = require("git-emit");
 var EE = require("events").EventEmitter;
@@ -13,7 +13,7 @@ var snapshot = require("./snapshot");
 function Snitcher(path){
 	if(!(this instanceof Snitcher)) return new Snitcher(path);
 	EE.call(this);
-	var subject = child_process.execSync(
+	var subject = cp.execSync(
 		"git config --get remote.origin.url",{cwd:path}
 	).toString("utf8");
 	if(!subject) throw new Error("Big Brother should be run from within a git repository");
@@ -58,15 +58,15 @@ Snitcher.prototype.start = function(next){
 			});
 		});
 	}).on('change', function(path) {
-		self.git_handle.diff("HEAD "+path,function(err,diff){
-			testRunner(self.path,function(err,test_res){
-				if(err) self.emit("error",err);
-				self.emit("fsdiff",{
-					subject:self.subject,
-					diff:diff,
-					path:path,
-					test:test_res
-				});
+		var diff = cp.fork("git diff HEAD "+path);
+		cp.on("error",console.error.bind(console));
+		testRunner(self.path,function(err,test_res){
+			if(err) self.emit("error",err);
+			self.emit("fsdiff",{
+				subject:self.subject,
+				diff:diff.stdout,
+				path:path,
+				test:test_res
 			});
 		});
 	}).on('unlink', function(path) {

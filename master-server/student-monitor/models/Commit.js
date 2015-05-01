@@ -6,7 +6,7 @@ var schema = new mongoose.Schema({
   user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
   test: {type:mongoose.Schema.Types.ObjectId, ref:"Test"},
   subject:String,
-  totalChanges:Number,
+  commitMessage:String,
   passedTests:Boolean,
   raw: Buffer
 });
@@ -35,9 +35,31 @@ schema.statics.Permission = function(req,next){
   return next(false);
 };
 
-schema.statics.defaultCreate = function(req){
-  return {user:req.user._id};
+schema.statics.defaultCreate = function(req,next){
+  next(void(0),{user:req.user._id});
 };
+
+schema.pre('save', function(next) {
+  if (!this.isNew) return next();
+  var subject = obj.subject;
+  var self = this;
+  var test = new Test({
+    user: this.user,
+    parent: this._id,
+    subject: this.subject,
+    passes: this.test.stats.passes,
+    score: this.test.stats.passes/this.test.stats.tests,
+    total: this.test.stats.tests,
+    raw: this.test
+  });
+  test.save(function(err,test){
+    if(err) return next(err);
+    self.test = test;
+    self.passedTests = test.score === 1;
+    next();
+  });
+});
+
 
 var Commit = mongoose.model('Commit', schema);
 module.exports = Commit;

@@ -24,34 +24,47 @@ module.exports.initialize = function(){
   });
 };
 
-
 module.exports.requestHelp = function(subject,description,snapshot,next){
-  var req = MASTER_SERVER.post(big_brother_url+"/help-request")
-  .field("subject",subject);
-  req.part()
-    .set('Content-Disposition', 'form-data; name="description"')
-    .set('Content-Type', 'text/plain')
-    .write(description);
-  var snappart = req.part()
-   .set('Content-Type', 'application/x-tar')
-   .set('Content-Disposition', 'attachment; filename=".tar"');
+  var req = MASTER_SERVER
+    .post(big_brother_url+"/help-request")
+    .field("subject",subject)
+    .field("description",description);
+  var snappart = req.part().type('application/x-tar')
+    .set('Content-Disposition', 'attachment; name="raw"; filename="file.tar"');
   snapshot.pipe(snappart);
 
   req.end(next);
 };
 
+module.exports.sendCommit = function(commit){
+  var req = MASTER_SERVER
+    .post(big_brother_url+"/FSDiff")
+    .field("subject",commit.subject)
+    .field("commitMessage",commit.message);
+  var testpart = req.part().type('text/plain')
+    .set('Content-Disposition', 'form-data; name="test"');
+  test.pipe(fsdiff.test);
+  var diffpart = req.part().type('text/plain')
+    .set('Content-Disposition', 'form-data; name="raw"');
+  diff.pipe(fsdiff.diff);
+  req.end(function(err,res){
+    if(err) throw err;
+  });
+};
 
-module.exports.sendCommit = function(subject,message,test,diff,next){
-  var req = MASTER_SERVER.post(big_brother_url+"/commit")
-  .field("subject",subject)
-  .field("message",message);
-  var testpart = req.part()
-    .set('Content-Disposition', 'form-data; name="test"')
-    .set('Content-Type', 'text/plain');
-  test.pipe(testpart);
-  var diffpart = req.part()
-  .set('Content-Disposition', 'form-data; name="diff"')
-  .set('Content-Type', 'text/plain');
-  diff.pipe(diffpart);
-  req.end(next);
+module.exports.sendFSDiff = function(fsdiff){
+  var req = MASTER_SERVER
+    .post(big_brother_url+"/FSDiff")
+    .field("subject",fsdiff.subject)
+    .field("path",fsdiff.path)
+    .field("fs_type",fsdiff.type);
+  var testpart = req.part().type("text/plain")
+    .set('Content-Disposition', 'form-data; name="test"');
+  test.pipe(fsdiff.test);
+  var diffpart = req.part().type("text/plain")
+    .set('Content-Disposition', 'form-data; name="raw"');
+  diff.pipe(fsdiff.diff);
+  req.end(function(err,res){
+    if(err) throw err;
+  });
 };
