@@ -1,28 +1,13 @@
 var passport = require('passport'),
     User = require('./UserModel'),
     LocalStrategy = require('passport-local').Strategy;
-/*
-  configure passport local strategy
-  note .use is passport's .use method here
-  Creates a new passport local strategy (the relevant classname inside passportlocal is Strategy)
-  When we call passport.authenticate('local') in the '/login' route, we create a new local strategy
-  which takes in the given username and password
-  we need to tell passport whether the username and pw are correct - we indicate with a callback done
-*/
 passport.use('local-login', new LocalStrategy(function(username, password, done){
   User.findOne({ username: username }, function(err, user) {
-    //if err, pass the error as a 500 response
     if (err) return done(err);
-    //if there is no user, we have a different problem
     if (!user) return done(null, false, { message: 'Unknown user ' + username });
     user.comparePassword(password, function(err, isMatch) {
-      //if err, pass the error forward as a 500 response
       if (err) return done(err);
-      //if bad password, we have a different problem
       if(!isMatch) return done(null, false, { message: 'Invalid password' });
-      // if success then pass forward no error (null) and some sort of user object
-      // the user object {id: username, name: username} gets passed to serializeUser
-      console.log('match found');
       return done(null, user);
     });
   });

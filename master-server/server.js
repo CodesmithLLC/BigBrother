@@ -49,7 +49,7 @@ function connectDatabase(config,next){
     mongoose.connection.removeListener("error",erlist);
     console.log("Database used "+config.db.url);
     var Grid = require('gridfs-stream');
-    mongoose.gfs = Grid(mongoose.connnection.db, mongoose.mongo);
+    mongoose.gfs = Grid(mongoose.connection.db, mongoose.mongo);
     next();
   };
   mongoose.connection.once( "error", erlist);
@@ -89,19 +89,22 @@ function registerRoutes(config,next){
   // ties apikey with user
   app.use(user.middleware.http);
   app.use(user.router);
-
   app.get("/",function(req,res,next){
+    console.log("index",req.user);
     if(!req.user) return res.redirect("/login");
-    if(req.user.roles.indexOf("teachers_assistant") !== -1) return res.redirect("/ta-portal");
-    if(req.user.roles.indexOf("student") !== -1) return res.redirect("/student-portal");
     next();
   });
+
+  app.use(require("./portals/router"));
 
   io.use(user.middleware.io);
   io.of("/bigbrother").on("connect",require("./student-monitor/ws.js"));
 //  io.of("/help-analysis").on("connect",require("./help-request/ws.js"));
 
   app.use(require("./Abstract/mongooseRouter"));
+  app.use(function(req,res,next){
+    next("Not found");
+  });
   next();
 }
 

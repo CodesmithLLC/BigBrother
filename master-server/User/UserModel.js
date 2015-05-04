@@ -38,7 +38,6 @@ userSchema.statics.userFromToken = function(token,cb){
 
 
 userSchema.pre('save', function(next) {
-  console.log('inside save method');
   var user = this;
   if(!user.isModified('password')) {
     return next();

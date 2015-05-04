@@ -1,10 +1,12 @@
 var U = require("./UserModel");
+var bcrypt = require('bcrypt-nodejs');
 var async = require("async");
+var SALT_WORK_FACTOR = 10;
 
 module.exports = function(config,next){
   async.parallel([upsertStudent,upsertTA],function(err){
     return next(err,{
-      middleware:require("./userMiddleware")(config),
+      middleware:require("./userMiddleware")(config.user),
       router:require("./router"),
     });
   });
@@ -13,10 +15,12 @@ module.exports = function(config,next){
 
 function upsertStudent(next){
   var p = Math.random().toString(36).substring(2);
+  var salt = bcrypt.genSaltSync(SALT_WORK_FACTOR);
+
   var u = new U({
-    permissions: ["student"],
+    roles: ["student"],
     email: "fake@email.com",
-    password: p
+    password: bcrypt.hashSync(p, salt)
   });
   var upsertData = u.toObject();
   delete upsertData._id;
@@ -29,16 +33,18 @@ function upsertStudent(next){
 
 function upsertTA(next){
   var p = Math.random().toString(36).substring(2);
+  var salt = bcrypt.genSaltSync(SALT_WORK_FACTOR);
+
   var u = new U({
-    permissions: ["teachers_assistant"],
+    roles: ["teachers_assistant"],
     email: "fake@email.com",
-    password: p
+    password: bcrypt.hashSync(p, salt)
   });
   var upsertData = u.toObject();
   delete upsertData._id;
   U.update({username: "ta"}, upsertData, {upsert: true}, function(err,model){
     if(err) return next(err);
-    console.log("student{name:\"ta\",pass:\""+p+"\"}");
+    console.log("ta{name:\"ta\",pass:\""+p+"\"}");
     next();
   });
 }

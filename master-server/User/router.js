@@ -1,6 +1,7 @@
 var express = require("express"),
 userModel = require("./UserModel"),
-passport = require("./passport.config.js");
+passport = require("./passport.config.js"),
+bodyParser = require("body-parser");
 
 
 var app = express.Router();
@@ -10,12 +11,14 @@ app.get("/login",function(req,res,next){
   //If a user exists, its not the user modules job to redirect it
   //Its the user modules job to not allow logging in
   if(req.user) return next();
-  res.sendFile("./login.html");
+  res.sendFile(__dirname+"/login.html");
 });
 
-app.post('/login', passport.authenticate('local-login'),function(req,res,next){
+app.post('/login',
+  bodyParser(),
+  passport.authenticate('local-login'),function(req,res,next){
     console.log('in login', req.user);
-    next();
+    res.redirect("/");
 });
 
 // API-style endpoint for checking if logged in on all pages

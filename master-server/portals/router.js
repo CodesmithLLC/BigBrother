@@ -38,3 +38,5 @@ function sendBrowserified(path,res,next){
     .set("Content-Type","application/javascript");
   b.pipe(res);
 }
+
+module.exports = app;
