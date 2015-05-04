@@ -31,7 +31,7 @@ Snitcher.prototype.start = function(next){
 	var self = this;
 	this.git_handle = simpleGit(this.path);
 	this.git_ee = gitEmit(this.gdir);
-	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]\.|[\/\\]node_modules/});
+	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]\.|[\/\\]node_modules|\.log$/});
 
 	this.git_ee.on("post-commit",function(){
 		var diff = cp.spawn("git",["diff", "HEAD^"],{cwd:self.path});
@@ -51,6 +51,7 @@ Snitcher.prototype.start = function(next){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
+				type:"add",
 				diff:"fs-add",
 				path:path,
 				test:test_res
@@ -63,6 +64,7 @@ Snitcher.prototype.start = function(next){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
+				type:"save",
 				diff:diff.stdout,
 				path:path,
 				test:test_res
@@ -73,6 +75,7 @@ Snitcher.prototype.start = function(next){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
+				type:"rem",
 				diff:"fs-rem",
 				path:path,
 				test:test_res

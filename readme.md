@@ -26,3 +26,8 @@ saved into gridfs
 * Should be able to parse the files retrieved from master server on client
   -gitParse
   -tar-parse-To display snapshots of help requests
+
+# Relevent issues
+
+* https://github.com/visionmedia/superagent/issues/455#issuecomment-98847613
+* https://github.com/substack/node-git-emit/pull/4
