@@ -4,8 +4,10 @@
   "description": "Watches files and commits and sends it to a server",
   "main": "server.js",
   "scripts": {
-    "test": "mocha",
-    "start": "node server.js"
+    "test": "mocha"
+  },
+  "bin":{
+    "bigbrother": "./bin.js"
   },
   "dependencies": {
     "async": "^0.9.0",

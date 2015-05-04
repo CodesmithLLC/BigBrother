@@ -34,7 +34,7 @@ Snitcher.prototype.start = function(next){
 	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]\.|[\/\\]node_modules/});
 
 	this.git_ee.on("post-commit",function(){
-		var diff = cp.fork("git diff HEAD^");
+		var diff = cp.spawn("git",["diff", "HEAD^"],{cwd:self.path});
 		diff.on("error",console.error.bind(console));
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
@@ -57,7 +57,7 @@ Snitcher.prototype.start = function(next){
 			});
 		});
 	}).on('change', function(path) {
-		var diff = cp.fork("git diff HEAD "+path);
+		var diff = cp.spawn("git",["diff", "HEAD"],{cwd:self.path});
 		diff.on("error",console.error.bind(console));
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);

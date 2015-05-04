@@ -19,6 +19,7 @@
     "diff-parse": "0.0.13",
     "express": "^4.12.3",
     "express-session": "^1.11.1",
+    "gridfs-stream": "^1.1.1",
     "lodash": "^3.7.0",
     "mongoose": "^4.0.2",
     "passport": "^0.2.1",

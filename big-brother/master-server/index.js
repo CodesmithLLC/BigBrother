@@ -3,7 +3,7 @@ var sa = require('superagent');
 
 var big_brother_url = "";
 
-var authtoke = void(0)
+var authtoke = void(0);
 var io;
 
 //The purpose for this is generally to make sure any calls have auth headers
@@ -40,7 +40,7 @@ module.exports.requestHelp = function(subject,description,snapshot,next){
 };
 
 module.exports.sendCommit = function(commit){
-  var req = MASTER_SERVER
+  var req = sa
     .post(big_brother_url+"/Commit")
     .field("subject",commit.subject)
     .field("commitMessage",commit.message);
@@ -56,7 +56,7 @@ module.exports.sendCommit = function(commit){
 };
 
 module.exports.sendFSDiff = function(fsdiff){
-  var req = MASTER_SERVER
+  var req = sa
     .post(big_brother_url+"/FSDiff")
     .field("subject",fsdiff.subject)
     .field("path",fsdiff.path)

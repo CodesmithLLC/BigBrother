@@ -21,9 +21,8 @@ module.exports = function(path,next){
 		if(!e) return cp.exec(mpDir+" -R json test/index.html",{cwd:path},function(e,stdout){
 			next(void(0),JSON.parse(stdout.toString("utf8")));
 		});
-		cp.execFile(mDir,["--reporter","json"],{cwd:path,env:process.env},function(e,stdout){
-			next(void(0),JSON.parse(stdout.toString("utf8")));
-		});
+		var test = cp.spawn(mDir,["--reporter","json"],{cwd:path,env:process.env});
+		next(void(0),test);
 	});
 /*
 	console.log(path);

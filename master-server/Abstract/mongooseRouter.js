@@ -2,6 +2,7 @@ var mongoose = require("mongoose");
 var router = require("express").Router();
 var url = require("url");
 var _ = require("lodash");
+var bodyHandler = require("./handleRequestBody");
 
 var isHidden = /^_.*/;
 
@@ -69,21 +70,25 @@ router.delete("/:classname/:id",function(req,res){
     res.status(200).send(doc.toObject());
   });
 });
-router.put("/:classname/:id",function(req,res){
-  req.doc.update(req.body,function(err, doc){
-    if(err) return next(new Error(err));
-    if(!doc) return res.status(404).end();
-    res.status(200).send(doc.toObject());
+router.put("/:classname/:id",function(req,res,next){
+  bodyHandler(req,req.doc,function(e){
+    if(e) return next(e);
+    req.doc.save(function(e){
+      if(e) return next(e);
+      res.status(200).send(doc.toObject());
+    });
   });
 });
 router.post("/:classname",function(req,res){
   var fin = function(err,create){
     if(err) return next(err);
-    _.merge(create,req.body||{});
-    req.mClass.create(req.body,function(err,doc){
-      if(err) return next(new Error(err));
-      if(!doc) return res.status(404).end();
-      res.redirect(201, req.params.classname+"/"+doc._id);
+    var doc = new req.mClass(create);
+    bodyHandler(req,doc,function(e){
+      if(e) return next(e);
+      inst.save(function(e){
+        if(e) return next(e);
+        res.redirect(201, req.params.classname+"/"+doc._id);
+      });
     });
   };
   if(req.mClass.defaultCreate){

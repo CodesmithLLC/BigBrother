@@ -48,6 +48,8 @@ function connectDatabase(config,next){
   oplist = function(err){
     mongoose.connection.removeListener("error",erlist);
     console.log("Database used "+config.db.url);
+    var Grid = require('gridfs-stream');
+    mongoose.gfs = Grid(mongoose.connnection.db, mongoose.mongo);
     next();
   };
   mongoose.connection.once( "error", erlist);
