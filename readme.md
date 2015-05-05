@@ -1,6 +1,6 @@
 # Big Brother Dev Setup
 
-* `cd big-brother`
+* `cd student-monitor`
 * `npm install`
 * `sudo npm link` - This is necessary to make sure that its available as a global command
 * `cd to/a/valid/github/repo`
