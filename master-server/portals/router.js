@@ -1,3 +1,7 @@
+
+
+require('require-all')("../help-request/models");
+
 var app = require("express").Router();
 var browserify = require("browserify");
 
@@ -20,9 +24,9 @@ app.get("/index.js",function(req,res,next){
   for(var i=0,l=roles.length;i<l;i++){
     switch(roles[i]){
       case "student":
-        return sendBrowserified("student-portal",res,next);
+        return sendBrowserified("student",res,next);
       case "teachers_assistant":
-        return sendBrowserified("ta-portal",res,next);
+        return sendBrowserified("ta",res,next);
     }
   }
   next();
@@ -30,6 +34,8 @@ app.get("/index.js",function(req,res,next){
 
 function sendBrowserified(path,res,next){
   var b = browserify(__dirname+"/"+path+"/client/browser")
+  .add(__root+"/help-request/browser/"+path)
+  .add(__root+"/student-monitor/browser/"+path)
   .transform('browserify-css') //might use brfs for the templates
   .bundle();
   b.on("error",next);

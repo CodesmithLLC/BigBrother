@@ -3,7 +3,7 @@ var TA = require("../portals/models/ta");
 
 module.exports = function(ws){
   if(ws.request.user.roles.indexOf("teachers_assistant") === -1){
-    return;
+    return ws.disconnect();
   }
   TA.find({user:ws.request.user},function(err,ta){
     if(err){

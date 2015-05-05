@@ -12,12 +12,26 @@
 * Start mongodb on port 27017 - this can be changed at master-server/config/default-config:db.url (Will likely change be changed to getconfig or another npm module)
 * `npm start`
 
+# Logging in
+* By default there are two users created, you can see these users in the terminal
+of the master-server
+* `student{name:"stu",pass:"A random password"}`
+* `ta{name:"ta",pass:"A random password"}`
+* goto "/login" or "/" (which will redirect to "/login")
+* fill out the form with either student or ta
+* it will redirect to "/" which will serve either the student or ta portal
 
 # What Is working:
 
 * Master server start
+* logging in
 * Big brother starts
+* Big brother sends when
 
+# Known issues
+
+* Big brother sends fs add events on start
+* None of the ui is working (though routing and psuedo code is practically complete)
 # What should be working but likely is not
 
 * Should be able to send post requests with "files" to master server, these files will be

@@ -4,14 +4,9 @@ var express = require("express"),
   server = require("http").Server(app),
   io = SIO(server),
   user = void(0);
-//	REE = require('redis-eventemitter');
 
 var async = require("async");
-/*
-
-Ice com database <-> Ice chat database
-
-*/
+global.__root = __dirname;
 
 async.applyEachSeries(
   [
@@ -98,8 +93,8 @@ function registerRoutes(config,next){
   app.use(require("./portals/router"));
 
   io.use(user.middleware.io);
-  io.of("/bigbrother").on("connect",require("./student-monitor/ws.js"));
-//  io.of("/help-analysis").on("connect",require("./help-request/ws.js"));
+  io.of("/student-monitor").on("connect",require("./student-monitor/ws.js"));
+//  io.of("/help-request").on("connect",require("./help-request/ws.js"));
 
   app.use(require("./Abstract/mongooseRouter"));
   app.use(function(req,res,next){

@@ -6,7 +6,8 @@ var schema = new mongoose.Schema({
   description:String,
   snapshot: {type: mongoose.Schema.Types.ObjectId, ref:"SnapShot"},
   taken: {type:Boolean, default:false},
-  solved: {type:Boolean, default:false}
+  solved: {type:Boolean, default:false},
+  escalation_level:{type:String, default:"local"}
 });
 
 schema.statics.fromObject = function(help_request,obj,next){
