@@ -22,7 +22,7 @@ Student.prototype.loadRanges = function(type,ranges,cb){
     if(e.data.error) return cb(e.data.error);
     cb(void 0, e.data.data);
   });
-  tempWorker.postMessage({
+  this.worker.postMessage({
     id:id,
     event:"ranges",
     data:{

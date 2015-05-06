@@ -7,9 +7,9 @@ app.get("/",function(req,res,next){
   for(var i=0,l=roles.length;i<l;i++){
     switch(roles[i]){
       case "student":
-        return res.sendFile(__dirname+"/student-portal/client/index.html");
+        return res.sendFile(__dirname+"/browser/student/index.html");
       case "teachers_assistant":
-        return res.sendFile(__dirname+"/ta-portal/client/index.html");
+        return res.sendFile(__dirname+"/browser/ta/index.html");
     }
   }
   next();
@@ -29,10 +29,9 @@ app.get("/index.js",function(req,res,next){
 });
 
 function sendBrowserified(path,res,next){
-  var b = browserify(__dirname+"/"+path+"/client/browser")
-  .add(__root+"/help-request/browser/"+path)
-  .add(__root+"/student-monitor/browser/"+path)
+  var b = browserify(__dirname+"/browser/"+path+"/index.js")
   .transform('browserify-css') //might use brfs for the templates
+  .transform('stringify') //using stringify for templates
   .bundle();
   b.on("error",next);
   res

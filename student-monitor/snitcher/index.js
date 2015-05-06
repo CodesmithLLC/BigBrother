@@ -31,7 +31,10 @@ Snitcher.prototype.start = function(next){
 	var self = this;
 	this.git_handle = simpleGit(this.path);
 	this.git_ee = gitEmit(this.gdir);
-	this.fs_watch = chokidar.watch(this.path, {ignored: /[\/\\]\.|[\/\\]node_modules|\.log$/});
+	this.fs_watch = chokidar.watch(this.path, {
+		ignored: /[\/\\]\.|[\/\\]node_modules|\.log$/,
+		ignoreInitial:true
+	});
 
 	this.git_ee.on("post-commit",function(){
 		var diff = cp.spawn("git",["diff", "HEAD^"],{cwd:self.path});

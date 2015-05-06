@@ -1,0 +1,29 @@
+TA enters
+
+Ta sees all available help requests that pertain to them
+  -classroom:their Classroom, escalation:local
+  -escalation:global
+
+When a help request is taken
+  -Remove that help request for the ta
+
+When a help request is taken by them
+  -Remove display countdown/Etc
+
+When a new help request is created
+  -Display it in the list
+
+Ta chooses a help request
+  -We download the tar in a webworker (unless its already downloaded)
+    -We show the root directory of the tar in "directory-traverser"
+  -We show that students statistics
+
+Ta chooses a file in "directory-traverser"
+  -We update the path
+  -We check if the file is a folder or a file
+  -If its a folder- we list what files are in the folder
+  -If its a file
+    -we display a highlighted version
+    -we display statistics for that specific file
+      -saves+diffs
+      -Whether it was included in a commit+diff
