@@ -1,65 +1,69 @@
 var mongoose = require("mongoose");
-var TA = require("../portals/models/ta");
-
-var classRooms = {};
-
-/*
-  we listen for a help request create
-    -we send it locally
-    -if a ta takes a help request
-      -request is added to the tas attempts
-      -ta is marked as busy
-      -notify the student
-      -If the request was unsuccessful
-        -It gets re-emitted
-        -request is added to the tas failures
-        -ta is marked as available
-      -If the request was successful
-        -ta is marked as available
-        -request is added to the tas successes
-    -after 5 minutes, if nobody took it
-      -foreach ta
-        -if the ta is not busy-request is added to the ignored
-      -We send the request to everyone but local
-        -we wait for 5 minutes to see if anybody takes the global help request
-        -foreach ta
-          -if the ta is not busy, they get marked
+var TA = require("../../portals/models/ta");
+var HelpRequest = require("../models/HelpRequest");
 
 
-*/
+module.exports = function(io){
+  var hr_id2to = {};
 
-module.exports = function(ws){
-  var user = ws.request.user;
-  TA.find({user:user},function(err,ta){
-    if(err){
-      console.error(err);
-      return ws.disconnect();
+  HelpRequest.schema.post("save",function(help){
+    if(help.state === "waiting"){
+      return escalate(help.escalation,help);
     }
-    var cl, fl;
-    mongoose.ee.on(ta.classroom+'/help-request',cl = function(help){
-      if(commit.student.classroom !== ta.classroom) return;
-      ws.emit(ta.classroom+'/help-request:create',help);
-      var t, l;
-    });
-    mongoose.ee.on('global/help-request',cl = function(help){
-      if(commit.student.classroom === ta.classroom) return;
-      ws.emit(ta.classroom+'/help-request:create',help);
-      var t, l;
-    });
-    ws.on("take-help",function(help_id){
-      if(help_id !== help_id) return;
-
-    });
-    mongoose.ee.on('help-request:create',fl = function(fsdiff){
-      if(fsdiff.student.classroom !== ta.classroom) return;
-      ws.emit("fsdiff",fsdiff);
-    });
-    ws.on("disconnect",function(){
-      classRooms[ta.classroom] = {};
-      mongoose.ee.removeListener("fsdiff:create",fl);
-      mongoose.ee.removeListener("commit:create",cl);
-    });
   });
-};
 
-var HelpRequest = require("./models/HelpRequest");
+  function escalate(level,help){
+    hr_id2to[help._id] = setTimeout(function(){
+      if(level === "admin"){
+        return noHelp(help);
+      }
+      TA.markIgnore(level,help,function(e){
+        return escalate(level === "global"?"admin":"global",help);
+      });
+    },5*60*1000);
+    level = level==="local"?help.classroom:level;
+    HelpRequest.update({_id:help._id},{escalation:level},function(e){
+      if(e) console.error(e);
+      io.to(level+"/help-request").emit("request",help);
+    });
+  }
+
+  function noHelp(help){
+    HelpRequest.update({_id:help._id},{state:"timeout"},function(e){
+      if(e) console.error(e);
+      console.log("no help");
+    });
+  }
+
+  return function(ws){
+    var user = ws.request.user;
+    TA.find({user:user},function(err,ta){
+      if(err){
+        console.error(err);
+        return ws.disconnect();
+      }
+      if(!ta){
+        console.error("didn't find ta");
+        return ws.disconnect();
+      }
+      var cl, gl, fl;
+      ws.join(ta.classroom+"-requests");
+      ws.join("global-requests");
+      ws.on("help-take",function(help_id){
+        if(!(help_id in hr_id2to)){
+          return ws.emit("help-taken",help_id);
+        }
+        clearTimeout(hr_id2to[help_id]);
+        delete hr_id2to[help_id];
+        HelpRequest.findByIdAndUpdate(help_id,{$push:{ta:ta._id}, state:"taken"},function(e,help){
+          if(e) console.error(e);
+          ws.broadcast
+            .to(help.escalation==="local"?help.classroom:help.escalation)
+            .emit("help-taken",help._id);
+          ws.broadcast.to(help.student).emit("help-taken",help._id);
+          ws.emit("go-help",help._id);
+        });
+      });
+    });
+  };
+};

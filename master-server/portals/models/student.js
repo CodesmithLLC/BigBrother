@@ -1,12 +1,12 @@
 var mongoose = require("mongoose");
 
-var userSchema = mongoose.Schema({
+var schema = mongoose.Schema({
   user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
   classroom: String,
   helpRequestsSent: [{type: mongoose.Schema.Types.ObjectId, ref:"HelpRequest"}],
 });
 
-userSchema.pre('save', function(next) {
+schema.pre('save', function(next) {
   console.log('inside save method');
   var user = this;
   if(!user.isModified('password')) {
@@ -20,4 +20,4 @@ userSchema.pre('save', function(next) {
 });
 
 // Change when releasing/ clear DB before
-module.exports = mongoose.model('Student', userSchema);
+module.exports = mongoose.model('Student', schema);

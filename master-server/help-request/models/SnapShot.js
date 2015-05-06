@@ -7,15 +7,9 @@ var schema = new mongoose.Schema({
   raw: Buffer
 });
 
-schema.statics.fromObject = function(help_request,obj,next){
-  this.create({
-    user:help_request.user,
-    help_request:help_request,
-    subject:help_request.subject,
-    raw:obj
-  },next);
-};
-
+schema.pre("save",function(schema,next){
+  next();
+});
 
 var SnapShot = mongoose.model('SnapShot', schema);
-module.exports = Test;
+module.exports = SnapShot;

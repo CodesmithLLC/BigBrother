@@ -1,7 +1,3 @@
-
-
-require('require-all')("../help-request/models");
-
 var app = require("express").Router();
 var browserify = require("browserify");
 

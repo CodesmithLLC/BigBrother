@@ -3,11 +3,15 @@ var mongoose = require("mongoose");
 var schema = new mongoose.Schema({
   student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   ta: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
+  classroom:{type:String,required:true,index:true},
   description:String,
   snapshot: {type: mongoose.Schema.Types.ObjectId, ref:"SnapShot"},
-  taken: {type:Boolean, default:false},
-  solved: {type:Boolean, default:false},
-  escalation_level:{type:String, default:"local"}
+  state:{
+    type:String,
+    enum:["waiting","taken","solved","canceled","timeout"],
+    default:"waiting"
+  },
+  escalation:{type:String, default:"local"}
 });
 
 schema.statics.fromObject = function(help_request,obj,next){
@@ -35,5 +39,5 @@ schema.statics.defaultCreate = function(req){
 };
 
 
-var SnapShot = mongoose.model('SnapShot', schema);
-module.exports = Test;
+var HelpRequest = mongoose.model('HelpRequest', schema);
+module.exports = HelpRequest;

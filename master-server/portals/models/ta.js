@@ -23,8 +23,8 @@ schema.pre('save', function(next) {
 });
 
 schema.statics.markIgnore = function(level,help,next){
-  
+
 };
 
 // Change when releasing/ clear DB before
-module.exports = mongoose.model('TA', userSchema);
+module.exports = mongoose.model('TA', schema);

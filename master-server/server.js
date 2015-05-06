@@ -93,8 +93,8 @@ function registerRoutes(config,next){
   app.use(require("./portals/router"));
 
   io.use(user.middleware.io);
-  io.of("/student-monitor").on("connect",require("./student-monitor/ws.js"));
-//  io.of("/help-request").on("connect",require("./help-request/ws.js"));
+  io.of("/student-monitor").on("connect",require("./student-monitor/ws"));
+  io.of("/help-request").on("connect",require("./help-request/ws")(io));
 
   app.use(require("./Abstract/mongooseRouter"));
   app.use(function(req,res,next){

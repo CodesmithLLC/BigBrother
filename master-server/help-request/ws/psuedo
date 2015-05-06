@@ -1,0 +1,20 @@
+we listen for a help request create
+  -we send it locally
+  -if a ta takes a help request
+    -request is added to the tas attempts
+    -ta is marked as busy
+    -notify the student
+    -If the request was unsuccessful
+      -It gets re-emitted
+      -request is added to the tas failures
+      -ta is marked as available
+    -If the request was successful
+      -ta is marked as available
+      -request is added to the tas successes
+  -after 5 minutes, if nobody took it
+    -foreach ta
+      -if the ta is not busy-request is added to the ignored
+    -We send the request to everyone but local
+      -we wait for 5 minutes to see if anybody takes the global help request
+      -foreach ta
+        -if the ta is not busy, they get marked
