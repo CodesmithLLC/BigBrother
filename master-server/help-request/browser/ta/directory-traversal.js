@@ -39,3 +39,5 @@ Snapshot.prototype.goTo = function(path){
 Snapshot.prototype.render = function(path){
   this.worker.postMessage({event:"retrieve",path:path});
 };
+
+module.exports = Snapshot;

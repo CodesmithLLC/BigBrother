@@ -15,10 +15,8 @@ module.exports = function(config){
       sa.get("/classrooms").end(function(err,res){
         if(err) return next(err);
         res.response.forEach(function(classroom){
-          self.classrooms.append(globals.classRoomTemplate.replace(
-            /\{\{classroom\}\}/,
-            classroom.name
-          ));
+          self.classrooms[classroom] = new ClassRoom(classroom);
+          self.classroomContain.append(self.classrooms[classroom].elem);
         });
         next();
       });

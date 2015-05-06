@@ -1,11 +1,15 @@
 
+var templateTransfrom = require("../../../../Abstract/template.js");
+var template = require("./view.html");
 
 function Student(student){
+  this._id = student._id;
   this.worker = new Worker("/student-worker.js");
   this.worker.postMessage({
     event:"initialize",
     data:student
   });
+  this.elem = templateTransfrom(template,student)[0];
 }
 
 

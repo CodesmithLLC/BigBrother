@@ -82,9 +82,11 @@ function listenToStartASnitcher(next){
 function startOurSnitcher(next){
 	snitcher = new (require("./snitcher"))(process.cwd());
 	snitcher.on("commit",function(commit){
+		console.log("commit",commit);
 		MASTER_SERVER.sendCommit(commit);
 	});
 	snitcher.on("fsdiff",function(diff){
+		console.log("fs change",diff);
 		MASTER_SERVER.sendFSDiff(diff);
 	});
 	snitcher.start(next);

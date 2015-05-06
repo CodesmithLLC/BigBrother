@@ -1,15 +1,15 @@
 var sa = require("superagent");
 var io = require("socket.io")();
-var $ = require("jquery");
-
-var studentTemplate = $("script.student-template").text();
-var classRoomTemplate = $("script.classroom-template").text();
+var Student = require("../Student");
+var template = require("./view.html");
+var templateTransfrom = require("../../../../Abstract/template.js");
 
 function ClassRoomChart(classroomname){
   this.currentRange = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
   this.max_range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
-  this.students = false;
+  this.students = [];
   this.name = classroomname;
+  this.elem = templateTransform(template,classroomname);
 }
 
 ClassRoom.prototype.getStudents = function(){
@@ -18,8 +18,10 @@ ClassRoom.prototype.getStudents = function(){
     if(self.students.length > 0) return ful(self.students);
     sa.get("/students",{classroom:this.name}).end(function(err,res){
       if(err) return rej(err);
-      self.students = res.response;
-      ful(res.response);
+      res.response.forEach(function(student){
+        self.students.push(new Student(student));
+      });
+      ful(self.students);
     });
   });
 };

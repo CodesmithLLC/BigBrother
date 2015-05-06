@@ -1,19 +1,19 @@
+require("c3/c3.css");
 var c3 = require("c3");
-var sa = require("superagent");
-var io = require("socket.io")();
 var lazy = require("lazy.js");
+var templateTransfrom = require("../../../../Abstract/template.js");
 var $ = require("jquery");
 
-var studentTemplate = $("script.student-template").text();
-var classRoomTemplate = $("script.classroom-template").text();
+var Classroom = require("../ClassRoom");
+var template = require("./view.html");
 
-function Chart(elem){
-  this.elem = $(elem);
+function Chart(){
+  this.elem = templateTransfrom(template,{})[0];
   this.min_max = [Number.POSITIVE_INFINITY, Date.now()];
   this.currentClassRoom = void 0;
-  this.availableClassRooms = {};
-  var studentContain = this.elem.find(".students");
-  var classroomContain = this.elem.find(".class_rooms");
+  this.classrooms = {};
+  this.studentContain = this.elem.find(".students");
+  this.classroomContain = this.elem.find(".class_rooms");
   var chart = c3.generate({
     bindto: elem.find(".display")[0],
     data: {},
@@ -30,24 +30,17 @@ Chart.prototype.initialize = require("./initialize");
 Chart.prototype.changeClassRoom = function(newclassroom){
   var self = this;
   if(this.currentClassRoom){
+    if(newclassroom === currentClassRoom.name) return;
     this.chart.unload({
       ids: this.currentClassRoom.getKeys()
     });
   }
   this.studentContain.clear();
-  new Promise(function(){
-    if(!(newclassroom in self.availableClassRooms)){
-      self.availableClassRooms[newclassroom] = new ClassRoom(newclassroom);
-    }
-    return self.availableClassRooms[newclassroom];
-  }).then(function(newclassroom){
-    self.currentClassRoom = newclassroom;
-    return newclassroom.getStudents();
-  }).then(function(students){
+  this.currentClassRoom = this.classrooms[newclassroom];
+  this.currentClassRoom.getStudents()
+  .then(function(students){
     students.forEach(function(student){
-      var studentDiv = studentTemplate.replace(/\{\{student\}\}/,student.name);
-      studentDiv = studentTemplate.replace(/\{\{id\}\}/,student._id);
-      self.studentContain.append(studentDiv);
+      self.studentContain.append(student.elem);
     });
   }).then(function(){
     var max = Date.now();
