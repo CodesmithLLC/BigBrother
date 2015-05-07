@@ -5,10 +5,11 @@ var folderTemplate = require("./snapshot-folder.html");
 var templateTransfrom = require("../../../../Abstract/template.js");
 var mime = require("mime-types");
 var UTF8 = require("utf-8");
+var work = require("webworkify");
 
 function HelpRequest(help){
   this.elem = templateTransfrom(template,help)[0];
-  this.worker = new Worker("./HelpRequest/worker.js");
+  this.worker = new Worker(require("./worker.js"));
   this.worker.postMessage({
     event:"initialize",
     data:help

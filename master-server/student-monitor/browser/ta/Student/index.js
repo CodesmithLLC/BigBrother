@@ -1,10 +1,11 @@
 
 var templateTransfrom = require("../../../../Abstract/template.js");
 var template = require("./view.html");
+var work = require("webworkify");
 
 function Student(student){
   this._id = student._id;
-  this.worker = new Worker("/student-worker.js");
+  this.worker = work(require("./worker.js"));
   this.worker.postMessage({
     event:"initialize",
     data:student

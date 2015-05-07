@@ -2,7 +2,6 @@ require("c3/c3.css");
 var c3 = require("c3");
 var lazy = require("lazy.js");
 var templateTransfrom = require("../../../../Abstract/template.js");
-var $ = require("jquery");
 
 var Classroom = require("../ClassRoom");
 var template = require("./view.html");
