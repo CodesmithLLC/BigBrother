@@ -9,7 +9,7 @@ var work = require("webworkify");
 
 function HelpRequest(help){
   this.elem = templateTransfrom(template,help)[0];
-  this.worker = new Worker(require("./worker.js"));
+  this.worker = work(require("./worker.js"));
   this.worker.postMessage({
     event:"initialize",
     data:help
