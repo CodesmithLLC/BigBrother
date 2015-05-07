@@ -1,16 +1,15 @@
 var io = require('socket.io-client');
 var sa = require('superagent');
 
-var big_brother_url = "";
+var stdms = "localhost:8123";
+var big_brother_url = "http://stuStatic:pass@localhost:8123";
 
-var authtoke = void(0);
 var io;
 
 //The purpose for this is generally to make sure any calls have auth headers
 module.exports.authorize = function(token){
-  authtoke = token;
+  big_brother_url = "http://"+token+"@"+stdms;
 };
-
 
 module.exports.initialize = function(){
   var EE = require("events").EventEmitter;
@@ -55,6 +54,7 @@ module.exports.sendFSDiff = function(fsdiff){
     .field("path",fsdiff.path)
     .field("fs_type",fsdiff.type)
     .attach("test",fsdiff.test.stdout,"test.txt");
+    console.log(fsdiff);
     if(typeof fsdiff.diff === "string"){
       req.field("raw",fsdiff.diff);
     }else{

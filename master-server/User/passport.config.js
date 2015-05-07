@@ -30,6 +30,20 @@ passport.use('local-signup', new LocalStrategy(
   }
 ));
 
+passport.use("basic",new (require("passport-http").BasicStrategy)(
+  function(username, password, done) {
+    User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) { return done(null, false); }
+      user.comparePassword(password, function(err, isMatch) {
+        if (err) return done(err);
+        if(!isMatch) return done(null, false, { message: 'Invalid password' });
+        return done(null, user);
+      });
+    });
+  }
+));
+
 /*
   we want to store an identifier in our session store under the particular sessionID given by express-session and stored in
   a cookie on the client's browser

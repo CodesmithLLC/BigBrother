@@ -9,7 +9,8 @@ var schema = new mongoose.Schema({
   state:{
     type:String,
     enum:["waiting","taken","solved","canceled","timeout"],
-    default:"waiting"
+    default:"waiting",
+    index:true
   },
   escalation:{type:String, default:"local"}
 });
@@ -34,7 +35,20 @@ schema.statics.Permission = function(req,next){
   return next(false);
 };
 
-schema.statics.defaultCreate = function(req){
+schema.statics.defaultCreate = function(req,next){
+  return next(void(0),{student:req.user});
+};
+
+schema.statics.defaultSearch = function(req,next){
+  mongoose.model("TA").find({user:req.user},function(err,ta){
+    if(err) return next(err);
+    next(void(0),{$or:[
+      {classroom:ta.classroom,escalation:"local"},
+      {escalation:"global"}
+      ],
+      state:"waiting"
+    });
+  });
   return {student:req.user};
 };
 

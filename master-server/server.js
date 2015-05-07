@@ -82,6 +82,10 @@ function setupUser(config,next){
 
 function registerRoutes(config,next){
   // ties apikey with user
+  app.use(function(req,res,next){
+    console.log("in");
+    next();
+  });
   app.use(user.middleware.http);
   app.use(user.router);
   app.get("/",function(req,res,next){
@@ -99,6 +103,9 @@ function registerRoutes(config,next){
   app.use(require("./Abstract/mongooseRouter"));
   app.use(function(req,res,next){
     next("Not found");
+  });
+  app.use(function(err,req,res,next){
+    console.error("http error: ",err);
   });
   next();
 }

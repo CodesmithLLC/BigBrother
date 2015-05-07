@@ -29,6 +29,10 @@ router.param('method', function(req, res, next, method){
   next();
 });
 
+router.use(function(req,res,next){
+  console.log("before mongoose");
+  next();
+});
 router.use(["/:classname","/:classname/*"],function(req,res,next){
   if(!req.mClass.Permission) return next();
   req.mClass.Permission(req,function(boo){
@@ -39,11 +43,13 @@ router.use(["/:classname","/:classname/*"],function(req,res,next){
 router.get("/:classname",function(req,res,next){
   var ipp = 10;
   if(req.query.ipp){
-    ipp = delete req.query.ipp;
+    ipp = req.query.ipp;
+    delete req.query.ipp;
   }
   var sort = "-createdOn";
   if(req.query.sort){
-    sort = delete req.query.sort;
+    sort = req.query.sort;
+    delete req.query.sort;
   }
   var fin = function(err,search){
     if(err) return next(err);
@@ -79,7 +85,7 @@ router.put("/:classname/:id",function(req,res,next){
     });
   });
 });
-router.post("/:classname",function(req,res){
+router.post("/:classname",function(req,res,next){
   var fin = function(err,create){
     if(err) return next(err);
     var doc = new req.mClass(create);
@@ -87,7 +93,7 @@ router.post("/:classname",function(req,res){
       if(e) return next(e);
       inst.save(function(e){
         if(e) return next(e);
-        res.redirect(201, req.params.classname+"/"+doc._id);
+        res.status(200).send(inst.toObject());
       });
     });
   };

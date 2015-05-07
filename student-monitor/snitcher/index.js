@@ -43,7 +43,7 @@ Snitcher.prototype.start = function(next){
 			if(err) self.emit("error",err);
 			self.emit("commit",{
 				subject:self.subject,
-				diff:diff.stdout,
+				diff:diff,
 				test:test_res
 			});
 		});
@@ -68,7 +68,7 @@ Snitcher.prototype.start = function(next){
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"save",
-				diff:diff.stdout,
+				diff:diff,
 				path:path,
 				test:test_res
 			});

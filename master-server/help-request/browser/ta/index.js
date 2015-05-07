@@ -6,9 +6,8 @@ var sa = require("sa");
 var template = require("./template.html");
 var templateTransfrom = require("../../../../Abstract/template.js");
 
-function HelpList(ta){
+function HelpList(){
   var self = this;
-  this.ta = ta;
   this.requests = {};
   this.elem = templateTransfrom(template,help)[0];
   this.list = this.elem.querySelector(".help-list");
@@ -22,9 +21,7 @@ function HelpList(ta){
     self.requests[help_id].close();
     delete self.requests[help_id];
   });
-  sa.get("/HelpRequest",{$or:[
-    {classroom:ta.classroom,escalation:"local"},{escalation:"global"}
-  ], state:"waiting"}).end(function(err,res){
+  sa.get("/HelpRequest",{ipp:100}).end(function(err,res){
     res.response.forEach(self.addHelp.bind(self));
   });
 }

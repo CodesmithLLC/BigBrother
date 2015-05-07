@@ -7,19 +7,29 @@ module.exports = function(req,instance,next){
   var ret = {};
   var paths = instance.constructor.schema.paths;
   var busboy = new Busboy({ headers: req.headers });
+  var piping = false;
+  var queue = [];
   busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
     if(!(fieldname in paths)) return;
-    console.log(paths[fieldname]);
-    file.pipe(gfs.createWriteStream({
-      _id: instance._id+"/"+fieldname, // a MongoDb ObjectId
-      filename: filename, // a filename
+    if(piping){
+      return queue.push(arguments);
+    }
+    console.log("a file:",fieldname);
+    handleFile(file,{
+      _id: instance._id+"_"+fieldname, // a MongoDb ObjectId
+      filename: filename, // a filename may want to change this to something different
       content_type: mimetype,
       root: instance.constructor.modelName,
-    }));
-    instance[fieldname] = "gridfs://"+instance._id+"/"+fieldname;
+    },function(e){
+      if(e) return busboy.emit("error",e);
+      instance[fieldname] = "gridfs://"+instance._id+"_"+fieldname;
+      if(!queue.length) return;
+      busboy.emit.apply(busboy,'file',queue.pop());
+    });
   });
   busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) {
-    if(!(fieldname in path)) return;
+    if(!(fieldname in paths)) return;
+    console.log("a feild:",fieldname);
     if(val === "" || val === null) return;
     instance[fieldname] = val;
   });
@@ -27,6 +37,18 @@ module.exports = function(req,instance,next){
     console.log('Done parsing form!');
     next();
   });
-  busboy.on('error',next);
-  req.pipe(busboy);
+  req.pipe(busboy).on('error',next);
 };
+
+
+function handleFile(file, gridfsOb, next) {
+  file.on("data",function(data){
+    console.log(data.toString("utf8"));
+  });//
+  file.pipe(mongoose.gfs.createWriteStream(gridfsOb))
+  .on("error",next)
+  .on("finish",function(){
+    console.log("finished file: ",fieldname,filename);
+    next();
+  });
+}

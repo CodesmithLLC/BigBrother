@@ -19,7 +19,12 @@ module.exports = function(config){
     cookieParser(),
     session,
     passport.initialize(),
-    passport.session()
+    passport.session(),
+    function(req,res,next){
+      if(req.user) return next();
+      if(!req.headers.authorization) return next();
+      passport.authenticate('basic', { session: false })(req,res,next);
+    }
   ],ws:[
     passportSocketIo.authorize({
         secret: config.session_secret,

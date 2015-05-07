@@ -44,6 +44,9 @@ function startOurSnitcher(next){
 		MASTER_SERVER.sendCommit(commit);
 	});
 	snitcher.on("fsdiff",function(diff){
+		diff.test.stdout.on("data",function(data){
+			console.log(data.toString("utf8"));
+		});
 		MASTER_SERVER.sendFSDiff(diff);
 	});
 	snitcher.start(next);

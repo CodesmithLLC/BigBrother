@@ -7,7 +7,7 @@ var schema = new mongoose.Schema({
   passes: Number,
   total:Number,
   score: Number,
-  raw: Buffer
+  raw: String
 });
 
 

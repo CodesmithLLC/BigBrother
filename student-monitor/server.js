@@ -79,6 +79,7 @@ function listenToStartASnitcher(next){
 	next();
 }
 
+
 function startOurSnitcher(next){
 	snitcher = new (require("./snitcher"))(process.cwd());
 	snitcher.on("commit",function(commit){

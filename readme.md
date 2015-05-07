@@ -30,8 +30,10 @@ of the master-server
 
 # Known issues
 
-* Big brother sends fs add events on start
+* ~~Big brother sends fs add events on start~~
+* Busboy hangs when a file is empty or invalid
 * None of the ui is working (though routing and psuedo code is practically complete)
+
 # What should be working but likely is not
 
 * Should be able to send post requests with "files" to master server, these files will be
@@ -43,5 +45,6 @@ saved into gridfs
 
 # Relevent issues
 
+* https://github.com/mscdex/busboy/issues/73
 * https://github.com/visionmedia/superagent/issues/455#issuecomment-98847613
 * https://github.com/substack/node-git-emit/pull/4

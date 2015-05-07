@@ -18,10 +18,12 @@ module.exports = function(path,next){
 	}
 
 	fs.stat(path+"/test/index.html",function(e){
-		if(!e) return cp.exec(mpDir+" -R json test/index.html",{cwd:path},function(e,stdout){
-			next(void(0),JSON.parse(stdout.toString("utf8")));
-		});
-		var test = cp.spawn(mDir,["--reporter","json"],{cwd:path,env:process.env});
+		var test;
+		if(!e){
+			test = cp.spawn(mpDir,["-R","json","-s","proxy=http://localhost:8001","test/index.html"],{cwd:path,env:process.env});
+		}else{
+			test = cp.spawn(mDir,["--reporter","json"],{cwd:path,env:process.env});
+		}
 		next(void(0),test);
 	});
 /*
