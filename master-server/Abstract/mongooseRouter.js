@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 var router = require("express").Router();
 var url = require("url");
 var _ = require("lodash");
-var bodyHandler = require("./handleRequestBody");
+var bodyHandler = require("./handleRequestBody-multiparty");
 
 var isHidden = /^_.*/;
 
@@ -31,6 +31,7 @@ router.param('method', function(req, res, next, method){
 
 router.use(function(req,res,next){
   console.log("before mongoose");
+  console.log(req.body);
   next();
 });
 router.use(["/:classname","/:classname/*"],function(req,res,next){

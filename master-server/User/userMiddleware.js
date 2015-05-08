@@ -15,7 +15,6 @@ module.exports = function(config){
   });
 
   return {http:[
-    bodyParser.json(),
     cookieParser(),
     session,
     passport.initialize(),

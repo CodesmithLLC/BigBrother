@@ -23,7 +23,10 @@ module.exports = function(req,instance,next){
     },function(e){
       if(e) return busboy.emit("error",e);
       instance[fieldname] = "gridfs://"+instance._id+"_"+fieldname;
-      if(!queue.length) return;
+      if(!queue.length){
+        piping = false;
+        return;
+      }
       busboy.emit.apply(busboy,'file',queue.pop());
     });
   });

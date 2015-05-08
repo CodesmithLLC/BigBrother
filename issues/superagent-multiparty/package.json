@@ -1,0 +1,21 @@
+{
+  "name": "superagent-multiparty",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^0.9.0",
+    "busboy": "^0.2.9",
+    "express": "^4.12.3",
+    "formidable": "^1.0.17",
+    "multiparty": "^4.1.1",
+    "request": "^2.55.0",
+    "superagent": "^1.2.0"
+  }
+}

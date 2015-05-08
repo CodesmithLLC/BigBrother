@@ -27,13 +27,13 @@ app.get('/loggedin', function(req, res) {
   res.send(req.isAuthenticated() ? req.user : '0');
 });
 
-app.post('/logout', function(req, res){
+app.post('/logout', bodyParser(),function(req, res){
     req.logout();
     res.redirect('/login');
 });
 
 
-app.post('/signup', passport.authenticate('local-signup'),function(req,res){
+app.post('/signup', bodyParser(), passport.authenticate('local-signup'),function(req,res){
     console.log('inside signup');
     console.log('req.body', req.user);
     res.send(req.user);
