@@ -20,7 +20,6 @@ async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
   });
 
   sa.post("http://localhost:8000/"+name)
-    .set('Transfer-Encoding', 'chunked')
     .field("key1","value1")
     .field("key2","value2")
     .field("key3","value3")

@@ -50,3 +50,4 @@ saved into gridfs
 * https://github.com/visionmedia/superagent/issues/455#issuecomment-98847613
 * https://github.com/visionmedia/superagent/issues/546
 * https://github.com/substack/node-git-emit/pull/4
+* https://github.com/felixge/node-form-data/issues/108

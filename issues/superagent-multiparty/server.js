@@ -36,7 +36,7 @@ app.use(function(req,res,next){
 });
 
 app.use(function(err,req,res,next){
-  if(err) console.error(err);
+  if(err) console.error("Server Error:"+err);
 });
 
 
@@ -46,6 +46,8 @@ app.listen(8000,function(){
     switch(line){
       case "request": return runReqClient();
       case "superagent": return runSAClient();
+      case "request-bad": return runReqClient(true);
+      case "superagent-bad": return runSAClient(true);
     }
   });
 });
@@ -72,16 +74,16 @@ function isValid(part){
   return true;
 }
 
-function runReqClient(){
-  cp.fork("./client-req.js",{
+function runReqClient(bad){
+  cp.fork("./client-req"+(bad?"-bad":"")+".js",{
     env:process.env,
     uid:process.getuid(),
     gid:process.getgid()
   });
 }
 
-function runSAClient(){
-  cp.fork("./client-sa.js",{
+function runSAClient(bad){
+  cp.fork("./client-sa"+(bad?"-bad":"")+".js",{
     env:process.env,
     uid:process.getuid(),
     gid:process.getgid()
