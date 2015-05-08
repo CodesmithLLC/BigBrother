@@ -1,7 +1,8 @@
 var multiparty = require("multiparty");
 
 module.exports = function(isValid,req,res,next){
-  req.on("data",function(){
+  isValid(req);
+  req.on("data",function(data){
     console.log("data recieved");
   });
   req.on("error",next);

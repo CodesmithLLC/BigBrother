@@ -5,7 +5,7 @@ module.exports = function(isValid,req,res,next){
   var ret = {};
   var busboy = new Busboy({ headers: req.headers });
   busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-    if(!isValid.apply(void(0),arguments)) return;
+    if(!isValid(file)) return;
     file.resume();
     file.on("data",function(data){
       console.log("data recieved");
@@ -17,7 +17,6 @@ module.exports = function(isValid,req,res,next){
     });
   });
   busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) {
-    if(!isValid.apply(void(0),arguments)) return;
     console.log(fieldname, val);
   });
   busboy.on('finish', function() {

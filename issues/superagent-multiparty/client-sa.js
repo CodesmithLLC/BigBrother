@@ -1,9 +1,9 @@
-var sa = require("request");
+var sa = require("superagent");
 var cp = require("child_process");
 var async = require("async");
 
 async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
-  var diff = cp.spawn("git",["diff"],{
+  var diff = cp.spawn("git",["diff", "HEAD", "HEAD^"],{
     env:process.env,
     uid:process.getuid(),
     gid:process.getgid()
@@ -19,8 +19,8 @@ async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
     console.log("finished pushing");
   });
 
-  var req = sa
-    .post("http://localhost:8000/"+name)
+  var req = sa.post("http://localhost:8000/"+name);
+  req.set('Transfer-Encoding', 'chunked')
     .field("key1","value1")
     .field("key2","value2")
     .field("key3","value3")

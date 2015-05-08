@@ -5,7 +5,7 @@ var async = require("async");
 console.log("child");
 
 async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
-  var diff = cp.spawn("git",["diff"],{
+  var diff = cp.spawn("git",["diff","HEAD","HEAD^"],{
     env:process.env,
     uid:process.getuid(),
     gid:process.getgid()
@@ -20,18 +20,8 @@ async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
     console.log("finished pushing");
   });
 
-  var req = sa.post("http://localhost:8000/"+name,{formData:{
-    key1:"value1",
-    key2:"value2",
-    key3:"value3",
-    diff:{
-      value:  diff.stdout,
-      options: {
-        filename:"diff.txt",
-        contentType: 'text/plain'
-      }
-    },
-    key4:"value4"
+  var req = sa.post("http://localhost:8000/"+name,{headers: {
+    'transfer-encoding': 'chunked'
   }})
   .on("error",function(e){
     console.error(e);
@@ -40,6 +30,13 @@ async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
   .on("response",function(){
     next(true);
   });
+
+  var form = req.form();
+  form.append("key1","value1");
+  form.append("key2","value2");
+  form.append("key3","value3");
+  form.append("diff",diff.stdout,{filename:"diff.txt"});
+  form.append("key4","value4");
 },function(res){
   console.log("success: ",res);
 });

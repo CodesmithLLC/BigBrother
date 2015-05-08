@@ -1,10 +1,17 @@
 var express = require("express");
 var cp = require("child_process");
 
+var diff = cp.execSync("git diff HEAD HEAD^",{
+  env:process.env,
+  uid:process.getuid(),
+  gid:process.getgid()
+}).toString("utf8");
+var firstln = diff.split("\n")[0];
+
 var app = express();
 
 app.use(function(req,res,next){
-  console.log("content-type: ",req.headers["content-type"]);
+  console.log(req.headers);
   next();
 });
 
@@ -12,7 +19,7 @@ app.use(function(req,res,next){
   app.post("/"+type,function(req,res,next){
     console.log("hitting ",type);
     next();
-  },require("./multiparters/"+type).bind(void(0),isValid));
+  },require("./parter."+type).bind(void(0),isValid));
 
   app.get("/"+type,function(req,res,next){
     // show a file upload form
@@ -34,10 +41,34 @@ app.use(function(err,req,res,next){
 
 
 app.listen(8000,function(){
-  runReqClient();
+  var buff = "";
+  process.stdin.pipe(require("split")()).on("data",function(line){
+    switch(line){
+      case "request": return runReqClient();
+      case "superagent": return runSAClient();
+    }
+  });
 });
 
 function isValid(part){
+  var ready = false;
+  var buff = "";
+  part.on("data",function(data){
+    data = data.toString("utf8");
+    if(data.indexOf(firstln) > -1){
+      ready = true;
+    }
+    if(ready){
+      buff += data;
+    }
+  });
+  part.on("end",function(){
+    if(buff.indexOf(diff) > -1){
+      if(buff === diff){
+        console.log("perfect diff");
+      }else console.log("has diff");
+    }else console.error("bad diff");
+  });
   return true;
 }
 

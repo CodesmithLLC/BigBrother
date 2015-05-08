@@ -16,6 +16,7 @@
     "formidable": "^1.0.17",
     "multiparty": "^4.1.1",
     "request": "^2.55.0",
+    "split": "^0.3.3",
     "superagent": "^1.2.0"
   }
 }

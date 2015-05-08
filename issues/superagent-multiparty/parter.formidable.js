@@ -4,8 +4,8 @@ var formidable = require("formidable");
 module.exports = function(isValid,req,res,next){
   var form = new formidable.IncomingForm();
   form.onPart = function(part) {
-    if(!isValid(part)) return;
     if (!part.filename) return form.handlePart(part);
+    if(!isValid(part)) return;
     part.on("data",function(data){
       console.log("data recieved");
     })
