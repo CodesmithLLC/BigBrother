@@ -15,7 +15,7 @@ router.param('classname', function(req, res, next, classname){
 
 router.param("id", function(req,res,next,id){
   req.mClass.findOne({_id:req.params.id}, function(err, doc){
-    if(err) return next(new Error(err));
+    if(err) return next(err);
     if(!doc) return res.status(404).end();
     req.doc = doc;
     next();
@@ -72,7 +72,7 @@ router.get("/:classname/:id",function(req,res,next){
 });
 router.delete("/:classname/:id",function(req,res){
   req.doc.remove(function(err,doc){
-    if(err) return next(new Error(err));
+    if(err) return next(err);
     if(!doc) return res.status(404).end();
     res.status(200).send(doc.toObject());
   });
@@ -92,9 +92,9 @@ router.post("/:classname",function(req,res,next){
     var doc = new req.mClass(create);
     bodyHandler(req,doc,function(e){
       if(e) return next(e);
-      inst.save(function(e){
+      doc.save(function(e){
         if(e) return next(e);
-        res.status(200).send(inst.toObject());
+        res.status(200).send(doc.toObject());
       });
     });
   };

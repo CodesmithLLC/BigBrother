@@ -1,4 +1,5 @@
 var mongoose = require("mongoose");
+var Test = require("./Test");
 var Schema = mongoose.Schema;
 
 var schema = new mongoose.Schema({
@@ -26,9 +27,9 @@ schema.statics.defaultCreate = function(req,next){
   next(void(0),{user:req.user._id});
 };
 
-schema.pre('save', function(next) {
+schema.pre('validate', function(next) {
   if (!this.isNew) return next();
-  var subject = obj.subject;
+  var subject = this.subject;
   var self = this;
   var test = new Test({
     user: this.user,
@@ -43,6 +44,7 @@ schema.pre('save', function(next) {
     if(err) return next(err);
     self.test = test;
     self.passedTests = test.score === 1;
+    console.log("done with fsdiff");
     next();
   });
 });

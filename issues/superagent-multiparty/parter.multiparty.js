@@ -22,7 +22,6 @@ module.exports = function(isValid,req,res,next){
     console.log("Done parsing form");
     res.status(200).end("ok");
   });
-  form.on("error",next);
-  req.on("error",next);
+  form.on("error",function(){});
   form.parse(req);
 };

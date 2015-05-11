@@ -1,12 +1,16 @@
 var express = require("express");
 var cp = require("child_process");
 
-var diff = cp.execSync("git diff HEAD HEAD^",{
+var diff, firstln;
+cp.exec("git diff HEAD HEAD^",{
   env:process.env,
   uid:process.getuid(),
   gid:process.getgid()
-}).toString("utf8");
-var firstln = diff.split("\n")[0];
+},function(err,stdout){
+  if(err) throw err;
+  diff = stdout.toString("utf8");
+  firstln = diff.split("\n")[0];
+});
 
 var app = express();
 
@@ -36,7 +40,8 @@ app.use(function(req,res,next){
 });
 
 app.use(function(err,req,res,next){
-  if(err) console.error("Server Error:"+err);
+
+  if(err) console.error("Server Error:",req.path,err);
 });
 
 
@@ -89,3 +94,7 @@ function runSAClient(bad){
     gid:process.getgid()
   });
 }
+
+process.on("uncaughtException",function(e){
+  console.error("GLOBAL: ",e.stack);
+});

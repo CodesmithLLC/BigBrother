@@ -29,6 +29,7 @@ module.exports.initialize = function(){
 
 module.exports.requestHelp = function(subject,description,snapshot,next){
   var req = sa.post(big_brother_url+"/help-request")
+    .set("Transfer-Encoding","chunked")
     .field("subject",subject)
     .field("description",description)
     .attach("raw",snapshot,"snapshot.tar");
@@ -38,6 +39,7 @@ module.exports.requestHelp = function(subject,description,snapshot,next){
 module.exports.sendCommit = function(commit){
   var req = sa
     .post(big_brother_url+"/Commit")
+    .set("Transfer-Encoding","chunked")
     .field("subject",commit.subject)
     .field("commitMessage",commit.message)
     .attach("test",commit.test.stdout,"test.txt")
@@ -50,11 +52,11 @@ module.exports.sendCommit = function(commit){
 module.exports.sendFSDiff = function(fsdiff){
   var req = sa
     .post(big_brother_url+"/FSDiff")
+    .set("Transfer-Encoding","chunked")
     .field("subject",fsdiff.subject)
     .field("path",fsdiff.path)
     .field("fs_type",fsdiff.type)
     .attach("test",fsdiff.test.stdout,"test.txt");
-    console.log(fsdiff);
     if(typeof fsdiff.diff === "string"){
       req.field("raw",fsdiff.diff);
     }else{
