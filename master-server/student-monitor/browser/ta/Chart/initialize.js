@@ -1,6 +1,5 @@
 var sa = require("superagent");
 var async = require("async");
-var globals = require("./globals");
 
 module.exports = function(config){
   var self = this;

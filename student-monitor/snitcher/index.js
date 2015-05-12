@@ -43,6 +43,7 @@ Snitcher.prototype.start = function(next){
 			if(err) self.emit("error",err);
 			self.emit("commit",{
 				subject:self.subject,
+				message: cp.execSync("git log -1 --pretty=%B").toString("utf8"),
 				diff:diff,
 				test:test_res
 			});
