@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 var router = require("express").Router();
 var url = require("url");
 var _ = require("lodash");
-var bodyHandler = require("./handleRequestBody-multiparty");
+var bodyHandler = require("./handleRequestBody-formidable");
 
 var isHidden = /^_.*/;
 

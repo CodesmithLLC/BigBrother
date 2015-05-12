@@ -19,7 +19,6 @@ module.exports = function(req,instance,next){
       if (!part.filename) return;
       if(paths[part.name].instance.toLowerCase() === "objectid"){
         var model = mongoose.model(paths[part.name].options.ref);
-
         if(!model){
           return;
         }
@@ -27,13 +26,16 @@ module.exports = function(req,instance,next){
         part.resume();
         part.on("error",function(){});
         return oboe(part).done(function(obj){
+          console.log("obeo success:",obj);
           ops--;
           instance[part.name] = obj;
           if (ops === 0)
           {
               next();
           }
-        }).fail(req.emit.bind(req,"error"));
+        }).fail(function(e){
+          console.error("oboe failed: ",e.thrown.stack);
+        });
       }
       ops++;
       handleFile(part,{
@@ -60,6 +62,7 @@ module.exports = function(req,instance,next){
     if (ops === 0)
     {
       console.log("Done parsing form");
+      next();
     }
   });
   form.on("error",next);

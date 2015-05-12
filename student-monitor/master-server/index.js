@@ -46,6 +46,7 @@ module.exports.sendCommit = function(commit){
     .attach("raw",commit.diff.stdout,"diff.txt");
   req.end(function(err,res){
     if(err) throw err;
+    console.log("success");
   });
 };
 
@@ -64,5 +65,6 @@ module.exports.sendFSDiff = function(fsdiff){
     }
   req.end(function(err,res){
     if(err) throw err;
+    console.log("success");
   });
 };

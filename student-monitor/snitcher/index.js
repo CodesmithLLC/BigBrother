@@ -50,18 +50,20 @@ Snitcher.prototype.start = function(next){
 	});
 
 	this.fs_watch.on('add', function(path) {
+		var diff = cp.spawn("git",["diff", "HEAD", path],{cwd:self.path});
+		diff.on("error",console.error.bind(console));
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"add",
-				diff:"fs-add",
+				diff:diff,
 				path:path,
 				test:test_res
 			});
 		});
 	}).on('change', function(path) {
-		var diff = cp.spawn("git",["diff", "HEAD"],{cwd:self.path});
+		var diff = cp.spawn("git",["diff", "HEAD", path],{cwd:self.path});
 		diff.on("error",console.error.bind(console));
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
@@ -74,12 +76,14 @@ Snitcher.prototype.start = function(next){
 			});
 		});
 	}).on('unlink', function(path) {
+		var diff = cp.spawn("git",["diff", "HEAD", path],{cwd:self.path});
+		diff.on("error",console.error.bind(console));
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"rem",
-				diff:"fs-rem",
+				diff:diff,
 				path:path,
 				test:test_res
 			});

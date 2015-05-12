@@ -29,18 +29,20 @@ schema.statics.defaultCreate = function(req,next){
 
 schema.pre('validate', function(next) {
   if (!this.isNew) return next();
+  console.log("subject: ",this.subject);
+  console.log("user: ",this.user);
+  console.log("raw: ",this.raw.length);
+  if(!this.test) return next(new Error("test is undefined"));
+  if(!this.test.isNew){
+    return next();
+  }
   var subject = this.subject;
   var self = this;
-  var test = new Test({
-    user: this.user,
-    parent: this._id,
-    subject: this.subject,
-    passes: this.test.stats.passes,
-    score: this.test.stats.passes/this.test.stats.tests,
-    total: this.test.stats.tests,
-    raw: this.test
-  });
-  test.save(function(err,test){
+  this.test.user = this.user;
+  this.test.parent = this._id;
+  this.test.subject = this.subject;
+  this.test.save(function(err,test){
+    console.log("test done saving");
     if(err) return next(err);
     self.test = test;
     self.passedTests = test.score === 1;
@@ -49,6 +51,18 @@ schema.pre('validate', function(next) {
   });
 });
 
+
+schema.post("save",function(){
+  console.log("path: "+this.path);
+  console.log("subject: "+this.subject);
+  console.log("passedTests: "+this.passedTests);
+  console.log("fs_type: "+this.fs_type);
+  // streaming from gridfs
+  mongoose.gfs.createReadStream({
+    _id: this.raw.substring(6+3), // a MongoDb ObjectId
+    root: "FSDiff"
+  }).pipe(process.stdout);
+});
 
 var FSDiff = mongoose.model('FSDiff', schema);
 module.exports = FSDiff;

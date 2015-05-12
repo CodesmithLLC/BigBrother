@@ -28,21 +28,21 @@ schema.statics.defaultCreate = function(req,next){
 
 schema.pre('save', function(next) {
   if (!this.isNew) return next();
-  var subject = obj.subject;
+  if(!this.test) return next(new Error("test is undefined"));
+  if(!this.test.isNew){
+    return next();
+  }
+  var subject = this.subject;
   var self = this;
-  var test = new Test({
-    user: this.user,
-    parent: this._id,
-    subject: this.subject,
-    passes: this.test.stats.passes,
-    score: this.test.stats.passes/this.test.stats.tests,
-    total: this.test.stats.tests,
-    raw: this.test
-  });
-  test.save(function(err,test){
+  this.test.user = this.user;
+  this.test.parent = this._id;
+  this.test.subject = this.subject;
+  this.test.save(function(err,test){
+    console.log("test done saving");
     if(err) return next(err);
     self.test = test;
     self.passedTests = test.score === 1;
+    console.log("done with fsdiff");
     next();
   });
 });

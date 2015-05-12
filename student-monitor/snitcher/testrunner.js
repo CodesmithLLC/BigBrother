@@ -17,13 +17,16 @@ module.exports = function(path,next){
 		env[key] = process.env[key];
 	}
 
-	fs.stat(path+"/test/index.html",function(e){
+	getIndexHTML(path, function(e,indexhtml){
 		var test;
 		if(!e){
-			test = cp.spawn(mpDir,["-R","json","-s","proxy=http://localhost:8001","test/index.html"],{cwd:path,env:process.env});
+			test = cp.spawn(mpDir,["-R","json",indexhtml],{cwd:path,env:process.env});
 		}else{
 			test = cp.spawn(mDir,["--reporter","json"],{cwd:path,env:process.env});
 		}
+		test.on("error",function(){
+			console.log("ignoring test errors");
+		});
 		next(void(0),test);
 	});
 /*
@@ -35,66 +38,11 @@ module.exports = function(path,next){
 /*	*/
 };
 
-
-function JSONReporter(runner) {
-  var self = this;
-  Base.call(this, runner);
-
-  var tests = [],
-     	pending = [],
-     	failures = [],
-     	passes = [];
-
-  runner.on('test end', function(test){
-    tests.push(test);
-  });
-
-  runner.on('pass', function(test){
-    passes.push(test);
-  });
-
-  runner.on('fail', function(test){
-    failures.push(test);
-  });
-
-  runner.on('pending', function(test){
-    pending.push(test);
-  });
-
-  runner.on('end', function(){
-    var obj = {
-      stats: self.stats,
-      tests: tests.map(clean),
-      pending: pending.map(clean),
-      failures: failures.map(clean),
-      passes: passes.map(clean)
-    };
-
-    runner.testResults = obj;
-
-    process.stdout.write(JSON.stringify(obj, null, 2));
-  });
-}
-
-function clean(test) {
-  return {
-    title: test.title,
-    fullTitle: test.fullTitle(),
-    duration: test.duration,
-    err: errorJSON(test.err || {})
-  };
-}
-
-/**
- * Transform `error` into a JSON object.
- * @param {Error} err
- * @return {Object}
- */
-
-function errorJSON(err) {
-  var res = {};
-  Object.getOwnPropertyNames(err).forEach(function(key) {
-    res[key] = err[key];
-  }, err);
-  return res;
+function getIndexHTML(path,next){
+	fs.stat(path+"/test/index.html",function(e){
+		if(!e) return next(void(0),"text/index.html");
+		fs.stat(path+"/index.html",function(e){
+			next(e,"index.html");
+		});
+	});
 }
