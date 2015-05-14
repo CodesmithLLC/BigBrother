@@ -1,8 +1,8 @@
-
-var template = require("./template.html");
-var fileTemplate = require("./snapshot-file.html");
-var folderTemplate = require("./snapshot-folder.html");
-var templateTransfrom = require("../../../../Abstract/template.js");
+var fs = require("fs");
+var template = fs.readFileSync(__dirname+"/template.html",'utf8');
+var fileTemplate = fs.readFileSync(__dirname+"/snapshot-file.html",'utf8');
+var folderTemplate = fs.readFileSync(__dirname+"/snapshot-folder.html",'utf8');
+var templateTransfrom = require("../../../../Abstract/browserify-utils.js").renderTemplate;
 var mime = require("mime-types");
 var UTF8 = require("utf-8");
 var work = require("webworkify");

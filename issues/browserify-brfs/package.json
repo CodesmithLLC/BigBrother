@@ -1,0 +1,22 @@
+{
+  "name": "browserify-brfs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^0.9.0",
+    "brfs": "^1.4.0",
+    "browserify": "^10.1.3",
+    "c3": "^0.4.10",
+    "express": "^4.12.3",
+    "socket.io-client": "^1.3.5",
+    "superagent": "^1.2.0",
+    "uglifyify": "^3.0.1"
+  }
+}

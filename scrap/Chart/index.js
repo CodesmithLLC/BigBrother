@@ -1,10 +1,12 @@
-require("c3/c3.css");
+var fs = require("fs");
+var template = fs.readFileSync(__dirname+"/view.html");
+var temp = fs.readFileSync(require.resolve("c3/c3.css"),"utf8");
 var c3 = require("c3");
-var lazy = require("lazy.js");
-var templateTransfrom = require("../../../../Abstract/template.js");
+var utils = require("../../../../Abstract/browserify-utils.js");
+utils.appendCSS(temp);
+var templateTransfrom = utils.renderTemplate;
 
 var Classroom = require("../ClassRoom");
-var template = require("./view.html");
 
 function Chart(){
   this.elem = templateTransfrom(template,{})[0];

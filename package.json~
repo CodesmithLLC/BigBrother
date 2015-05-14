@@ -7,5 +7,7 @@
   },
   "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "JSONStream": "^0.10.0"
+  }
 }

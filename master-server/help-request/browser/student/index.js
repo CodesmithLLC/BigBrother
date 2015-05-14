@@ -1,56 +1,52 @@
+var sa = require("superagent");
+var io = require("socket.io-client");
+
 var HELP_STATES = [
   "none",
   "requesting",
   "recieving",
   "feedback"
 ];
-var help_state = "none";
 
-requestHelp.on("click",function(){
-  if(requesting_help !== "none"){
-    desktopNotifications.notify("We currently Your Help request has been submitted");
-  }
-  requesting_help = true;
-  var prompt = createPrompt();
-  var t = setTimeout(function(){
-    prompt.close();
-  },5000);
-  //
-  prompt.createTextArea("Give us a description of what you need help on");
-  prompt.createFolderSelector("Choose your directory");
-  prompt.on("hover",function(){
-    clearTimeout(t);
-  });
-  prompt.on("blur",function(){
-    t = setTimeout(function(){
-      prompt.close();
-    },5000);
-  });
-  prompt.on("submit",function(e){
-    e.preventDefault();
-    clearTimeout(t);
-    var description = prompt.textArea;
-    BIG_BROTHER.emit("send-help-request",{description:description},function(){
-      desktopNotifications.notify("Your Help request has been submitted");
+function HelpButton(form){
+  var self = this;
+  this.io = io("/help-request");
+  this.form = form;
+  form.on("submit",function(e){
+    if(requesting_help !== "none"){
+      return flash("We currently Your Help request has been submitted");
+    }
+    sa.post(
+      local_big_brother_url+"/send-help-request",
+      new FormData(e.target))
+    .end(function(err,res){
+      if(err) throw err;
+      flash("Your Help request has been submitted");
     });
   });
-});
-
-MASTER_SERVER.on("help-coming",function(helper){
-  if(help_state === "none"){
-    desktopNotifications.notify(
-      "The TA "+helper.name+" believes you're having some trouble. "+
+  io.on("help-state",function(state){
+    self.state = state;
+  });
+  io.on("help-coming",function(helper){
+    if(self.state === "none"){
+      flash(
+        "A TA is coming to you",
+        "The TA "+helper.name+" believes you're having some trouble. "+
+        "They will be contacting you "+(helper.remote?"online now.":"shortly")
+      );
+      self.state = "recieving";
+      return;
+    }
+    if(self.state !== "requesting"){
+      throw new Error("Help should not be coming");
+    }
+    flash(
+      "A TA will help you",
+      "The TA "+helper.name+" will be helping you with your problem. "+
       "They will be contacting you "+(helper.remote?"online now.":"shortly")
     );
-    help_state = "recieving";
-    return;
-  }
-  if(help_state !== "requesting"){
-    throw new Error("Help should not be coming");
-  }
-  desktopNotifications.notify(
-    "The TA "+helper.name+" will be helping you with your problem. "+
-    "They will be contacting you "+(helper.remote?"online now.":"shortly")
-  );
-  help_state = "recieving";
-});
+    self.state = "recieving";
+  });
+}
+
+module.exports = HelpButton;

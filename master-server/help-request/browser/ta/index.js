@@ -1,15 +1,16 @@
-var highlight = require("highlight");
+//var highlight = require("highlight");
 var HelpRequest = require("./HelpRequest");
-var io = require("socket.io");
-var sa = require("sa");
+var io = require("socket.io-client");
+var sa = require("superagent");
 
-var template = require("./template.html");
-var templateTransfrom = require("../../../../Abstract/template.js");
+var fs = require("fs");
+var template = fs.readFileSync(__dirname+"/List/template.html","utf8");
+var templateTransfrom = require("../../../Abstract/browserify-utils.js").renderTemplate;
 
 function HelpList(){
   var self = this;
   this.requests = {};
-  this.elem = templateTransfrom(template,help)[0];
+  this.elem = templateTransfrom(template,this)[0];
   this.list = this.elem.querySelector(".help-list");
   this.traverse = this.elem.querySelector(".directory-traversal");
   this.content = this.elem.querySelector(".file-content");
@@ -79,4 +80,4 @@ HelpList.prototype.updatePath = function(path){
   old.parent.replace(old,elem);
 };
 
-module.exports = HelpListener;
+module.exports = HelpList;

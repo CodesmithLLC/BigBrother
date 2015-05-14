@@ -1,36 +1,27 @@
 
-var templateTransfrom = require("../../../../Abstract/template.js");
-var template = require("./view.html");
-var work = require("webworkify");
+var fs = require("fs");
+var template = fs.readFileSync(__dirname+"/view.html",'utf8');
+var templateTransfrom = require("../../../../Abstract/browserify-utils.js").renderTemplate;
+var Chart = require("../../../../Abstract/webworker-chart");
+var sa = require("superagent");
 
 function Student(student){
   this._id = student._id;
-  this.worker = work(require("./worker.js"));
-  this.worker.postMessage({
-    event:"initialize",
-    data:student
-  });
   this.elem = templateTransfrom(template,student)[0];
-}
-
-
-Student.prototype.loadRanges = function(type,ranges,cb){
-  var l,id=Math.random()+"_"+Date.now();
   var self = this;
-  this.worker.addEventListener("message", l = function(e){
-    if(e.data.event !== id) return;
-    self.worker.removeEventListener("message",l);
-    if(e.data.error) return cb(e.data.error);
-    cb(void 0, e.data.data);
+  sa
+  .get("/students/"+this._id+"/diffs",{sort:"-createdAt",ipp:1,populate:"createdAt"})
+  .end(function(err,res){
+    if(err) throw err;
+    var d = Date.now();
+    self.chart = new Chart(
+      this.elem.querySelector(".chart"),
+      "createdAt",
+      "diff_num",
+      parseInt(res.responseText),d,
+      [d - 1000*60*60*24,d]
+    );
   });
-  this.worker.postMessage({
-    id:id,
-    event:"ranges",
-    data:{
-      type:type,
-      range:ranges
-    }
-  });
-};
+}
 
 module.exports = Student;

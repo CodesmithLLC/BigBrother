@@ -4,12 +4,20 @@
   <script src="/index.js"></script>
 </head>
 <body>
-  <button class="request-help" >Request Help</button>
-  <script type="text/html" class="help-prompt"></script>
-  <script type="text/javascript" src="/help-request.js"></script>
-  <script type="text/html" class="email-template" src="/help-request/template.html"></script>
+  <div id="messages"></div>
+  <form id="request-help">
+    <textarea name="description"></textarea>
+    <button type="submit" >Request Help</button>
+  </form>
+  <!--
+    <script type="text/html" class="help-prompt"></script>
+    <script type="text/javascript" src="/help-request.js"></script>
+    <script type="text/html" class="email-template" src="/help-request/template.html"></script>
+  -->
   <ul class="email-notifications"></ul>
-  <script type="text/javascript" src="/email-lister"></script>
-  <script type="text/html" class="email-template" src="/email-lister/template.html"></script>
+  <!--
+    <script type="text/javascript" src="/email-lister"></script>
+    <script type="text/html" class="email-template" src="/email-lister/template.html"></script>
+  -->
 </body>
 </html>

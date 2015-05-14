@@ -9,7 +9,7 @@ module.exports = function(req,res,next){
     if(err) return next(err);
     snapshot(snitcher.path,function(err,tar){
       if(err) return next(err);
-      MASTER_SERVER.requestHelp(snitcher.subject,desc,tar,function(err,res){
+      MASTER_SERVER.requestHelp(snitcher.subject,desc,tar,function(err,helpres){
         if(err) return next(err);
         res.status(200).end();
       });

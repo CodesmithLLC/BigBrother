@@ -1,10 +1,10 @@
+var fs = require("fs");
+var template = fs.readFileSync(__dirname+"/view.html",'utf8');
 var sa = require("superagent");
-var io = require("socket.io")();
 var Student = require("../Student");
-var template = require("./view.html");
-var templateTransfrom = require("../../../../Abstract/template.js");
+var templateTransfrom = require("../../../../Abstract/browserify-utils.js").renderTemplate;
 
-function ClassRoomChart(classroomname){
+function ClassRoom(classroomname){
   this.currentRange = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
   this.max_range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
   this.students = [];
@@ -54,4 +54,4 @@ ClassRoom.prototype.getStudentData = function(requestedRange,chart){
 };
 
 
-module.exports = Classroom;
+module.exports = ClassRoom;

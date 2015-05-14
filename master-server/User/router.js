@@ -27,9 +27,10 @@ app.get('/loggedin', function(req, res) {
   res.send(req.isAuthenticated() ? req.user : '0');
 });
 
-app.post('/logout', bodyParser(),function(req, res){
-    req.logout();
-    res.redirect('/login');
+app.get('/logout', bodyParser(),function(req, res){
+  console.log("logout");
+  req.logout();
+  res.redirect('/login');
 });
 
 
