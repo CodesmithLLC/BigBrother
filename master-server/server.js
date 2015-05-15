@@ -21,7 +21,9 @@ async.applyEachSeries(
     //give routes
     registerRoutes,
     //Ensure our server is up and running
-    setupServer
+    setupServer,
+    //Enable Terminal commands
+    setupStdIn
   ],
   require("./config"),
   function(err){
@@ -125,4 +127,27 @@ function setupServer(config,next){
     console.log("HTTP listening on http://localhost:"+config.http.port);
     next();
   });
+}
+
+function setupStdIn(config,next){
+  var mongoose = require("mongoose");
+  process.stdin.pipe(require("split")()).on("data",function(line){
+    if(/^gridfs/.test(line)){
+      var item;
+      if(/^gridfs:\/\//.test(line)){
+        item = line.substring(9);
+      }else{
+        item = line.split(" ")[1];
+      }
+      mongoose.gfs
+        .createReadStream({_id: item, root:"HelpRequest"})
+        .on("error",function(e){
+          console.error("cannot get ",item,e);
+        })
+        .pipe(process.stdout);
+      return;
+    }
+  });
+  console.log("commands enabled: ","gridfs");
+  next();
 }

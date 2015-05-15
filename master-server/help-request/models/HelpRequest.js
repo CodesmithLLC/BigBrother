@@ -5,7 +5,7 @@ var schema = new mongoose.Schema({
   ta: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
   classroom:{type:String,required:true,index:true},
   description:String,
-  snapshot: {type: mongoose.Schema.Types.ObjectId, ref:"SnapShot"},
+  raw: String,
   state:{
     type:String,
     enum:["waiting","taken","solved","canceled","timeout"],

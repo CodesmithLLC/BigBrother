@@ -23,11 +23,18 @@ function upsertStudent(next){
     u.password = p;
     u.save(function(err){
       if(err) return next(err);
-      var stu = new STU({user: u});
-      stu.save(function(err){
+      STU.findOne({user:u},function(err,stu){
         if(err) return next(err);
-        console.log("student{name:\"stu\",pass:\""+p+"\"}");
-        next();
+        if(stu){
+          console.log("student{name:\"stu\",pass:\""+p+"\"}");
+          return next();
+        }
+        stu = new STU({user: u});
+        stu.save(function(err){
+          if(err) return next(err);
+          console.log("student{name:\"stu\",pass:\""+p+"\"}");
+          next();
+        });
       });
     });
   });
@@ -47,11 +54,18 @@ function upsertTA(next){
     u.password = p;
     u.save(function(err){
       if(err) return next(err);
-      var ta = new TA({user: u});
-      ta.save(function(err){
+      TA.findOne({user:u},function(err,ta){
         if(err) return next(err);
-        console.log("ta{name:\"ta\",pass:\""+p+"\"}");
-        next();
+        if(ta){
+          console.log("ta{name:\"ta\",pass:\""+p+"\"}");
+          return next();
+        }
+        ta = new TA({user: u});
+        ta.save(function(err){
+          if(err) return next(err);
+          console.log("ta{name:\"ta\",pass:\""+p+"\"}");
+          next();
+        });
       });
     });
   });
@@ -70,11 +84,18 @@ function staticStudent(next){
     }
     u.save(function(err){
       if(err) return next(err);
-      var stu = new STU({user: u});
-      stu.save(function(err){
+      STU.findOne({user:u},function(err,stu){
         if(err) return next(err);
-        console.log("student{name:\"stuStatic\",pass:\"pass\"}");
-        next();
+        if(stu){
+          console.log("student{name:\"stuStatic\",pass:\"pass\"}");
+          return next();
+        }
+        stu = new STU({user: u});
+        stu.save(function(err){
+          if(err) return next(err);
+          console.log("student{name:\"stuStatic\",pass:\"pass\"}");
+          next();
+        });
       });
     });
   });
@@ -94,11 +115,18 @@ function staticTA(next){
     }
     u.save(function(err){
       if(err) return next(err);
-      var ta = new TA({user: u});
-      ta.save(function(err){
+      TA.findOne({user:u},function(err,ta){
         if(err) return next(err);
-        console.log("ta{name:\"taStatic\",pass:\"pass\"}");
-        next();
+        if(ta){
+          console.log("ta{name:\"taStatic\",pass:\"pass\"}");
+          return next();
+        }
+        ta = new TA({user: u});
+        ta.save(function(err){
+          if(err) return next(err);
+          console.log("ta{name:\"taStatic\",pass:\"pass\"}");
+          next();
+        });
       });
     });
   });

@@ -22,6 +22,14 @@ router.param("id", function(req,res,next,id){
   });
 });
 
+router.param("property", function(req,res,next,property){
+  if(isHidden.test(property)) return res.status(404).end();
+  if(!req.doc) return res.status(404).end();
+  if(!(property in req.mClass.schema.paths)) return res.status(404).end();
+  req.paths = req.mClass.schema.paths;
+  next();
+});
+
 router.param('method', function(req, res, next, method){
   if(isHidden.test(method)) return res.status(404).end();
   if(req.doc && !req.doc[method]) return res.status(404).end();
@@ -41,6 +49,24 @@ router.use(["/:classname","/:classname/*"],function(req,res,next){
     if(!boo) return res.status(403).end();
     next();
   });
+});
+router.post("/:classname",function(req,res,next){
+  var fin = function(err,create){
+    if(err) return next(err);
+    var doc = new req.mClass(create);
+    bodyHandler(req,doc,function(e){
+      if(e) return next(e);
+      doc.save(function(e){
+        if(e) return next(e);
+        res.status(200).send(doc.toObject());
+      });
+    });
+  };
+  if(req.mClass.defaultCreate){
+    req.mClass.defaultCreate(req,fin);
+  }else{
+    fin(void(0),{});
+  }
 });
 router.get("/:classname",function(req,res,next){
   var ipp = 10;
@@ -71,6 +97,27 @@ router.get("/:classname",function(req,res,next){
 router.get("/:classname/:id",function(req,res,next){
   res.status(200).send(req.doc.toObject());
 });
+router.get("/:classname/:id/:property",function(req,res,next){
+  var paths = req.paths;
+  if(paths[req.params.property].instance !== "string"){
+    return res.status(200).send(req.doc[req.params.property]);
+  }
+  if(!/^gridfs::\/\//.test(req.doc[req.params.property])){
+    return res.status(200).send(req.doc[req.params.property]);
+  }
+  var prop = {
+    _id: req.doc[req.params.property].substring(9),
+    root: instance.constructor.modelName
+  };
+  mongoose.gfs.findOne(prop, function (err, file) {
+    if(err) return next(err);
+    if(!file) return res.status(404).end();
+    console.log(file);
+    res.status(200).set("Content-Type",file["content-type"]);
+    mongoose.gfs.createReadStream(prop).on("error",next).pipe(res);
+  });
+});
+
 router.delete("/:classname/:id",function(req,res){
   req.doc.remove(function(err,doc){
     if(err) return next(err);
@@ -87,24 +134,7 @@ router.put("/:classname/:id",function(req,res,next){
     });
   });
 });
-router.post("/:classname",function(req,res,next){
-  var fin = function(err,create){
-    if(err) return next(err);
-    var doc = new req.mClass(create);
-    bodyHandler(req,doc,function(e){
-      if(e) return next(e);
-      doc.save(function(e){
-        if(e) return next(e);
-        res.status(200).send(doc.toObject());
-      });
-    });
-  };
-  if(req.mClass.defaultCreate){
-    req.mClass.defaultCreate(req,fin);
-  }else{
-    fin(void(0),{});
-  }
-});
+
 
 router.post("/:classname/:method",function(req,res){
   req.mClass[req.params.method](req.body,function(err,ret){
