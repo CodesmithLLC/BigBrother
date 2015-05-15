@@ -11,8 +11,8 @@ program
 
 	try{
 		var pid = fs.readFileSync(pidStore).toString("utf8");
-		process.kill(pid);
 		fs.unlinkSync(pidStore);
+		process.kill(pid);
 	}catch(e){
 		console.log("You likely don't have Big Brother around");
 		//console.error(e);
@@ -42,6 +42,10 @@ program
 	.on("end",function(){
 		console.log("Big Brother is watching @_@");
 	}).pipe(process.stdout);
+});
+
+program.command('debug').action(function(){
+	require(__dirname+"/server");
 });
 
 program.version('0.0.1').parse(process.argv);

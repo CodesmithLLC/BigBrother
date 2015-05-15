@@ -1,6 +1,7 @@
 var passport = require('passport'),
     User = require('./UserModel'),
-    LocalStrategy = require('passport-local').Strategy;
+    LocalStrategy = require('passport-local').Strategy,
+    BasicStrategy = require('passport-http').BasicStrategy;
 passport.use('local-login', new LocalStrategy(function(username, password, done){
   User.findOne({ username: username }, function(err, user) {
     if (err) return done(err);
@@ -30,15 +31,23 @@ passport.use('local-signup', new LocalStrategy(
   }
 ));
 
-passport.use("basic",new (require("passport-http").BasicStrategy)(
-  function(username, password, done) {
+passport.use("basic",new BasicStrategy({passReqToCallback:true},
+  function(req,username, password, done) {
     User.findOne({ username: username }, function (err, user) {
+      console.log("after find");
       if (err) { return done(err); }
       if (!user) { return done(null, false); }
-      user.comparePassword(password, function(err, isMatch) {
+      console.log("before token");
+      user.compareToken(req.ip, password, function(err, isMatch) {
         if (err) return done(err);
-        if(!isMatch) return done(null, false, { message: 'Invalid password' });
-        return done(null, user);
+        if(isMatch) return done(null, user);
+        console.log("before password");
+        user.comparePassword(password, function(err, isMatch) {
+          if (err) return done(err);
+          if(isMatch) return done(null, user);
+          console.log("nothing good");
+          done(null, false, { message: 'Invalid password' });
+        });
       });
     });
   }

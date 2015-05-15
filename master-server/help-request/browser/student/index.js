@@ -1,5 +1,6 @@
 var sa = require("superagent");
-var io = require("socket.io-client");
+var sio = require("socket.io-client");
+var jQuery = require("jquery");
 
 var HELP_STATES = [
   "none",
@@ -9,35 +10,38 @@ var HELP_STATES = [
 ];
 
 function HelpButton(form){
-  var self = this;
-  this.io = io("/help-request");
-  this.form = form;
+  var state = "none";
+  var io = sio(window.location.origin+"/help-request");
+  form = jQuery(form);
   form.on("submit",function(e){
-    if(requesting_help !== "none"){
+    e.preventDefault();
+    if(state !== "none"){
       return flash("We currently Your Help request has been submitted");
     }
+    console.log(this);
     sa.post(
-      local_big_brother_url+"/send-help-request",
-      new FormData(e.target))
-    .end(function(err,res){
+      local_big_brother_url+"/send-help-request"
+    ).send(
+      {description:jQuery(this).find("[name=description]").val()}
+    ).end(function(err,res){
       if(err) throw err;
       flash("Your Help request has been submitted");
     });
   });
-  io.on("help-state",function(state){
-    self.state = state;
+  io.on("help-state",function(new_state){
+    state = new_state;
   });
   io.on("help-coming",function(helper){
-    if(self.state === "none"){
+    if(state === "none"){
       flash(
         "A TA is coming to you",
         "The TA "+helper.name+" believes you're having some trouble. "+
         "They will be contacting you "+(helper.remote?"online now.":"shortly")
       );
-      self.state = "recieving";
+      state = "recieving";
       return;
     }
-    if(self.state !== "requesting"){
+    if(state !== "requesting"){
       throw new Error("Help should not be coming");
     }
     flash(
@@ -45,7 +49,7 @@ function HelpButton(form){
       "The TA "+helper.name+" will be helping you with your problem. "+
       "They will be contacting you "+(helper.remote?"online now.":"shortly")
     );
-    self.state = "recieving";
+    state = "recieving";
   });
 }
 

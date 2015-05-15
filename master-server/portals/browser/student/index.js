@@ -1,6 +1,7 @@
-var flashMessenger = require("../../../Abstract/browser-flash");
+var flashMessager = require("../../../Abstract/browser-flash");
 
-window.flash = new flashMessenger(document.getElementById("messages"));
-
-
-var helpButton = require("../../../help-request/browser/student")();
+requestAnimationFrame(function(){
+  window.flash = flashMessager("#messages");
+  require("../../../help-request/browser/student")("#request-help");
+  require("../../../student-monitor/browser/student");
+});

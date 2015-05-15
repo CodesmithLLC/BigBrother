@@ -16,6 +16,8 @@ async.applyEachSeries(
     connectToClusterEE,
     //Ensure we can support user sessions
     setupUser,
+    //create the dummy users
+    createDummyUsers,
     //give routes
     registerRoutes,
     //Ensure our server is up and running
@@ -23,7 +25,10 @@ async.applyEachSeries(
   ],
   require("./config"),
   function(err){
-    if(err) throw err;
+    if(err){
+      console.error("have error");
+      throw err;
+    }
     console.log("Server Ready");
   }
 );
@@ -80,6 +85,10 @@ function setupUser(config,next){
   });
 }
 
+function createDummyUsers(config,next){
+  require("./debug")(next);
+}
+
 function registerRoutes(config,next){
   // ties apikey with user
   app.use(function(req,res,next){
@@ -96,9 +105,10 @@ function registerRoutes(config,next){
 
   app.use(require("./portals/router"));
 
-  io.use(user.middleware.io);
+  user.middleware.ws.forEach(io.use.bind(io));
   io.of("/student-monitor").on("connect",require("./student-monitor/ws"));
-  io.of("/help-request").on("connect",require("./help-request/ws")(io));
+  var ns = io.of("/help-request");
+  ns.on("connect",require("./help-request/ws")(ns));
 
   app.use(require("./Abstract/mongooseRouter"));
   app.use(function(req,res,next){

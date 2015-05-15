@@ -31,12 +31,13 @@ router.param('method', function(req, res, next, method){
 
 router.use(function(req,res,next){
   console.log("before mongoose");
-  console.log(req.body);
   next();
 });
 router.use(["/:classname","/:classname/*"],function(req,res,next){
+  console.log("permitting");
   if(!req.mClass.Permission) return next();
   req.mClass.Permission(req,function(boo){
+    console.log("permission: ",boo);
     if(!boo) return res.status(403).end();
     next();
   });

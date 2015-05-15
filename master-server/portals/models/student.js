@@ -1,8 +1,8 @@
 var mongoose = require("mongoose");
 
 var schema = mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
-  classroom: String,
+  user: {type: mongoose.Schema.Types.ObjectId, ref:"User", unique:true},
+  classroom: {type:String, default:"Demo", required:true},
   helpRequestsSent: [{type: mongoose.Schema.Types.ObjectId, ref:"HelpRequest"}],
 });
 

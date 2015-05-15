@@ -22,8 +22,9 @@ module.exports = function(config){
     function(req,res,next){
       if(req.user) return next();
       if(!req.headers.authorization) return next();
+      console.log("basic");
       passport.authenticate('basic', { session: false })(req,res,next);
-    }
+    },
   ],ws:[
     passportSocketIo.authorize({
         secret: config.session_secret,
@@ -33,6 +34,12 @@ module.exports = function(config){
         cookieParser: cookieParser
     }),
     function(socket,next){
+      console.log("end middleware");
+      if(socket.request.user){
+        console.log("have user: ",socket.request.user);
+        return next();
+      }
+      console.log(socket.request);
       var token = socket.request.query.token;
       if(!token) return next();
       UserModel.userFromToken(token,function(e,user){

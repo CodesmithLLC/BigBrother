@@ -1,8 +1,8 @@
 var mongoose = require("mongoose");
 
 var schema = mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
-  classroom: String,
+  user: {type: mongoose.Schema.Types.ObjectId, ref:"User", unique:true},
+  classroom: {type:String, default:"Demo", required:true},
   ignores: [{type: mongoose.Schema.Types.ObjectId, ref:"HelpRequest"}],
   successes: [{type: mongoose.Schema.Types.ObjectId, ref:"HelpRequest"}],
   failures: [{type: mongoose.Schema.Types.ObjectId, ref:"HelpRequest"}],
@@ -27,4 +27,4 @@ schema.statics.markIgnore = function(level,help,next){
 };
 
 // Change when releasing/ clear DB before
-module.exports = mongoose.model('TA', schema);
+module.exports = mongoose.model('TeachersAssistant', schema);

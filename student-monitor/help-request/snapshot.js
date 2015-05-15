@@ -6,17 +6,18 @@ var isWhiteSpace = /^\s*$/;
 
 module.exports = function(path,next){
   fs.readFile(path+"/.gitignore",{encoding:"utf8"},function(err,ignores){
+    if(err) return next(err);
     var globMatches = [];
     ignores.split("\n").forEach(function(ignore){
       if(isWhiteSpace.test(ignore)) return;
       globMatches.push(minimatch.filter(ignore, {matchBase: true}));
     });
-    return tar.pack(path,{
+    return next(void(0),tar.pack(path,{
       ignore:function(name){
         return globMatches.some(function(fn){
           return fn(name);
         });
       }
-    });
+    }));
   });
 };

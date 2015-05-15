@@ -15,9 +15,9 @@ var authorized = false;
 var STUDENT_PORTAL_LISTENER, snitcher;
 
 async.parallel([
+	startOurSnitcher,
 	createStudentPortalListener,
 //	listenToStartASnitcher
-	startOurSnitcher,
 ],function(err){
 	if(err) throw err;
 });
@@ -27,14 +27,21 @@ function createStudentPortalListener(next){
 	STUDENT_PORTAL_LISTENER = express();
 	STUDENT_PORTAL_LISTENER.use(function(req,res,next){
 		console.log(req.url);
-		res.set("Access-Control-Allow-Origin", "*"); next();
+		res
+		.set("Access-Control-Allow-Methods: POST GET")
+		.set("Access-Control-Allow-Origin", "*")
+		.set("Access-Control-Allow-Headers","Origin, Content-Type");
+		next();
 	});
 	STUDENT_PORTAL_LISTENER.use(express.static(__dirname+"/test_tools"));
-	STUDENT_PORTAL_LISTENER.get("/send-help-request",require("./help-request/route"));
 
 	STUDENT_PORTAL_LISTENER.use(require('body-parser')());
-	STUDENT_PORTAL_LISTENER.post("/authorize",function(req,res){
-		MASTER_SERVER.authorize("authorize",req.body.token);
+	STUDENT_PORTAL_LISTENER.post("/send-help-request",
+		require("./help-request/route").bind(void 0,snitcher)
+	);
+	STUDENT_PORTAL_LISTENER.post("/token",function(req,res){
+		MASTER_SERVER.authorize(req.body);
+		res.status(200).end();
 	});
 
 	STUDENT_PORTAL_LISTENER.listen(8001);

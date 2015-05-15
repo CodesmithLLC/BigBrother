@@ -8,7 +8,8 @@ var io;
 
 //The purpose for this is generally to make sure any calls have auth headers
 module.exports.authorize = function(token){
-  big_brother_url = "http://"+token+"@"+stdms;
+  console.log(token);
+  big_brother_url = "http://"+token.user+":"+token.token+"@"+stdms;
 };
 
 module.exports.initialize = function(){
@@ -28,7 +29,8 @@ module.exports.initialize = function(){
 };
 
 module.exports.requestHelp = function(subject,description,snapshot,next){
-  var req = sa.post(big_brother_url+"/help-request")
+  console.log(big_brother_url+"/HelRequest");
+  var req = sa.post(big_brother_url+"/HelpRequest")
     .set("Transfer-Encoding","chunked")
     .field("subject",subject)
     .field("description",description)

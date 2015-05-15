@@ -40,5 +40,15 @@ app.post('/signup', bodyParser(), passport.authenticate('local-signup'),function
     res.send(req.user);
 });
 
+app.get('/token',function(req,res,next){
+  if(!req.user) return next();
+  console.log('getting token');
+  req.user.createToken(req.ip,function(err,token){
+    if(err) return next(err);
+    res.send({user:req.user.username,token:token});
+  });
+});
+
+
 
 module.exports = app;

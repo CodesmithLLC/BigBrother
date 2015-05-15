@@ -25,18 +25,26 @@ schema.statics.fromObject = function(help_request,obj,next){
 };
 
 schema.statics.Permission = function(req,next){
+  console.log("req: ",req);
+  console.log("user: ",req.user);
   if(!req.user) return next(false);
   if(req.method === "GET"){
-    return next(req.user.permissions.indexOf("teachers_assistant") !== -1);
+    return next(req.user.roles.indexOf("teachers_assistant") !== -1);
   }
   if(req.method === "POST"){
-    return next(req.user.permissions.indexOf("student") !== -1);
+    console.log("here",req.user.roles.indexOf("student") !== -1);
+
+    return next(req.user.roles.indexOf("student") !== -1);
   }
   return next(false);
 };
 
 schema.statics.defaultCreate = function(req,next){
-  return next(void(0),{student:req.user});
+  mongoose.model("Student").findOne({user:req.user},function(err,stud){
+    if(err) return next(err);
+    if(!stud) return next(new Error("this student does not exist"));
+    return next(void 0, {student:stud,classroom:stud.classroom});
+  });
 };
 
 schema.statics.defaultSearch = function(req,next){

@@ -18,24 +18,30 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
 };
 
 // Password verification
-userSchema.methods.createToken = function(cb) {
-  var now = Date.now();
+userSchema.methods.createToken = function(ipaddress,next) {
   //This obviously will change, and if it doesn't, its easy to fake
-  cb(void(0), this._id + "_" + now);
+  ipaddress = new Buffer(ipaddress).toString('base64');
+  next(void(0), ipaddress+"_"+this._id + "_" + Date.now());
 };
 
-userSchema.statics.userFromToken = function(token,cb){
+userSchema.methods.compareToken = function(ipaddress,token,next){
+  if(token.length < 3) return next(void 0, false);
   token = token.split("_");
-  if(parseInt(token[1]) + 5000 < Date.now()){
-    return next("timeout");
+  ipaddress = new Buffer(ipaddress).toString('base64');
+  if(ipaddress !== token[0]){
+    console.log(ipaddress,"!==",token[0]);
+    return next(void 0,false);
   }
-  this.findOne({_id:token[0]},function(err,user){
-    if(err) return next(err);
-    if(!user) return next("Not Found");
-    next(void(0),user);
-  });
+  if(this._id.toString() !== token[1]){
+    console.log(this._id, "!==", token[1]);
+    return next(void 0,false);
+  }
+  if(Date.now() - 60*60*1000 > token[2]){
+    console.log(Date.now() - 60*60*1000, ">", token[2]);
+    return next(void 0,false);
+  }
+  return next(void 0, true);
 };
-
 
 userSchema.pre('save', function(next) {
   var user = this;

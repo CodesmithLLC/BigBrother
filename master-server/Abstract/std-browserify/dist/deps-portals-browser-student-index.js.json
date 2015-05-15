@@ -1,9 +1,13 @@
 [
-{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/index.js","deps":{"./pageVisiblePolyfill":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/pageVisiblePolyfill.js"}}
+{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/index.js","deps":{"./pageVisiblePolyfill":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/pageVisiblePolyfill.js","mustache":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/mustache/mustache.js","jquery":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/jquery/dist/jquery.js"}}
 ,
 {"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/pageVisiblePolyfill.js","deps":{}}
 ,
-{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/help-request/browser/student/index.js","deps":{"superagent":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/superagent/lib/client.js","socket.io-client":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/socket.io-client/index.js"}}
+{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/help-request/browser/student/index.js","deps":{"jquery":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/jquery/dist/jquery.js","superagent":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/superagent/lib/client.js","socket.io-client":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/socket.io-client/index.js"}}
+,
+{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/jquery/dist/jquery.js","deps":{}}
+,
+{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/mustache/mustache.js","deps":{}}
 ,
 {"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/socket.io-client/index.js","deps":{"./lib/":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/socket.io-client/lib/index.js"}}
 ,
@@ -111,5 +115,7 @@
 ,
 {"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/superagent/node_modules/reduce-component/index.js","deps":{}}
 ,
-{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/portals/browser/student/index.js","deps":{"../../../Abstract/browser-flash":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/index.js","../../../help-request/browser/student":"/home/sam/Programming/client/codesmith/BigBrother/master-server/help-request/browser/student/index.js"}}
+{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/portals/browser/student/index.js","deps":{"../../../Abstract/browser-flash":"/home/sam/Programming/client/codesmith/BigBrother/master-server/Abstract/browser-flash/index.js","../../../student-monitor/browser/student":"/home/sam/Programming/client/codesmith/BigBrother/master-server/student-monitor/browser/student/index.js","../../../help-request/browser/student":"/home/sam/Programming/client/codesmith/BigBrother/master-server/help-request/browser/student/index.js"}}
+,
+{"id":"/home/sam/Programming/client/codesmith/BigBrother/master-server/student-monitor/browser/student/index.js","deps":{"superagent":"/home/sam/Programming/client/codesmith/BigBrother/master-server/node_modules/superagent/lib/client.js"}}
 ]
