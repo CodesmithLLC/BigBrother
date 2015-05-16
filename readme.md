@@ -25,14 +25,27 @@ of the master-server
 
 * Master server start
 * logging in
+* Minimal UI
 * Big brother starts
-* Big brother sends when
+* Big brother sends diffs on filesystem change
+* Big brother sends diffs on commit
+* Big brother sends tarball on request
+* Big brother can be stopped
+* Big brother runs in the background
 
 # Known issues
 
 * ~~Big brother sends fs add events on start~~
-* Busboy hangs when a file is empty or invalid
+* ~~Busboy hangs when a file is empty or invalid~~ No longer using busboy
 * None of the ui is working (though routing and psuedo code is practically complete)
+* Streaming on the Browser is near impossible currently without creating our own wrapper
+
+# Known Refactoring necessary
+* Abstract/mongooseRouter - remove anonymous functions, create a context object
+* Abstract/mongooseRouter#17 - Expensive operation for the sake of pretty urls
+* Abstract/mongooseRouter#123 - Peice out use cases
+* */Models/* - Permissions should not be with the model
+
 
 # What should be working but likely is not
 

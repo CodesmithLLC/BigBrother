@@ -25,8 +25,6 @@ schema.statics.fromObject = function(help_request,obj,next){
 };
 
 schema.statics.Permission = function(req,next){
-  console.log("req: ",req);
-  console.log("user: ",req.user);
   if(!req.user) return next(false);
   if(req.method === "GET"){
     return next(req.user.roles.indexOf("teachers_assistant") !== -1);
@@ -48,7 +46,7 @@ schema.statics.defaultCreate = function(req,next){
 };
 
 schema.statics.defaultSearch = function(req,next){
-  mongoose.model("TA").find({user:req.user},function(err,ta){
+  mongoose.model("TeachersAssistant").find({user:req.user},function(err,ta){
     if(err) return next(err);
     next(void(0),{$or:[
       {classroom:ta.classroom,escalation:"local"},

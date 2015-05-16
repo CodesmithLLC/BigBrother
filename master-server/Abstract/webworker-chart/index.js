@@ -9,11 +9,11 @@ var work = require("webworkify");
 function Chart(elem,x_key,y_key,min,max,zoom){
   this.elem = elem;
   this.chart = c3.generate({
-    bindto: elem,
+    bindto: elem[0],
     data: {},
     subchart: {
       show: true,
-      onbrush:this.requestRange.bind(this)
+      onbrush:this.requestRanges.bind(this)
     }
   });
   this.min = min;

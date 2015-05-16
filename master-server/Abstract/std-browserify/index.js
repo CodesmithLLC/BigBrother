@@ -7,6 +7,10 @@ var JSONStream = require("JSONStream");
 module.exports = function sendBrowserified(path,res,next){
   var b = browserify(path)
   .transform('brfs') //might use brfs for the templates
+  .transform({
+    global: true,
+    sourcemap: false
+  },'uglifyify')
   .bundle()
   .on("error",next);
   res

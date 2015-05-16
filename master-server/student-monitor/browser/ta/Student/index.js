@@ -1,21 +1,23 @@
-
 var fs = require("fs");
 var template = fs.readFileSync(__dirname+"/view.html",'utf8');
 var templateTransfrom = require("../../../../Abstract/browserify-utils.js").renderTemplate;
 var Chart = require("../../../../Abstract/webworker-chart");
 var sa = require("superagent");
+var jQuery = require("jquery");
+var Mustache = require("mustache");
+Mustache.parse(template);
 
 function Student(student){
   this._id = student._id;
-  this.elem = templateTransfrom(template,student)[0];
+  this.elem = jQuery(Mustache.render(template,student));
   var self = this;
   sa
-  .get("/students/"+this._id+"/diffs",{sort:"-createdAt",ipp:1,populate:"createdAt"})
+  .get("/Student/"+this._id+"/FSDiff",{sort:"-createdAt",ipp:1,populate:"createdAt"})
   .end(function(err,res){
     if(err) throw err;
     var d = Date.now();
     self.chart = new Chart(
-      this.elem.querySelector(".chart"),
+      self.elem.find(".chart"),
       "createdAt",
       "diff_num",
       parseInt(res.responseText),d,

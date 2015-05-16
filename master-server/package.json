@@ -25,6 +25,7 @@
     "express-session": "^1.11.1",
     "formidable": "^1.0.17",
     "gridfs-stream": "^1.1.1",
+    "highland": "^2.5.0",
     "highlight": "^0.2.3",
     "lodash": "^3.7.0",
     "mime-types": "^2.0.11",

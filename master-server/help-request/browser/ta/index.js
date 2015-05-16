@@ -15,15 +15,16 @@ function HelpList(){
   this.traverse = this.elem.querySelector(".directory-traversal");
   this.content = this.elem.querySelector(".file-content");
   this.currentRequest = void(0);
-  this.io = io("/help-request");
-  io.on("help-request",self.addHelp.bind(self));
-  io.on("help-taken",function(help_id){
+  this.io = io(window.location.origin+"/help-request");
+  this.io.on("help-request",self.addHelp.bind(self));
+  this.io.on("help-taken",function(help_id){
     self.requests[help_id].elem.parent.removeChild(self.requests[help_id].elem);
     self.requests[help_id].close();
     delete self.requests[help_id];
   });
   sa.get("/HelpRequest",{ipp:100}).end(function(err,res){
-    res.response.forEach(self.addHelp.bind(self));
+    if(err) throw err;
+    res.body.forEach(self.addHelp.bind(self));
   });
 }
 

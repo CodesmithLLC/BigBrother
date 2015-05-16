@@ -3,7 +3,7 @@ var Test = require("./Test");
 var Schema = mongoose.Schema;
 
 var schema = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
+  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   test: {type:mongoose.Schema.Types.ObjectId, ref:"Test"},
   path: String,
   subject:String,
@@ -24,7 +24,10 @@ schema.statics.Permission = function(req,next){
 };
 
 schema.statics.defaultCreate = function(req,next){
-  next(void(0),{user:req.user._id});
+  mongoose.model("Student").find({user:req.user._id}).exec(function(err,doc){
+    if(err) return next(err);
+    next(void 0, {student:doc._id});
+  });
 };
 
 schema.pre('validate', function(next) {
