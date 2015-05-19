@@ -79,7 +79,7 @@ function staticStudent(next){
         username: "stuStatic",
         roles: ["student"],
         email: "fake@email.com",
-        password: pass
+        password: "pass"
       });
     }
     u.save(function(err){
@@ -110,7 +110,7 @@ function staticTA(next){
         username: "taStatic",
         roles: ["teachers_assistant"],
         email: "fake@email.com",
-        password: pass
+        password: "pass"
       });
     }
     u.save(function(err){

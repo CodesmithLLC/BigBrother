@@ -4,6 +4,11 @@ var schema = new mongoose.Schema({
   student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   ta: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
   classroom:{type:String,required:true,index:true},
+  createdAt: {
+    type:Date,
+    default:Date.now,
+    index:true
+  },
   description:String,
   raw: String,
   state:{
@@ -14,15 +19,6 @@ var schema = new mongoose.Schema({
   },
   escalation:{type:String, default:"local"}
 });
-
-schema.statics.fromObject = function(help_request,obj,next){
-  this.create({
-    student:help_request.user,
-    help_request:help_request,
-    subject:help_request.subject,
-    raw:obj
-  },next);
-};
 
 schema.statics.Permission = function(req,next){
   if(!req.user) return next(false);

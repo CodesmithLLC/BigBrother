@@ -10,7 +10,10 @@ function Chart(elem,x_key,y_key,min,max,zoom){
   this.elem = elem;
   this.chart = c3.generate({
     bindto: elem[0],
-    data: {},
+    data: {
+      xs: {},
+      columns: []
+    },
     subchart: {
       show: true,
       onbrush:this.requestRanges.bind(this)
@@ -51,6 +54,13 @@ Chart.prototype.addURL =function(url,name){
   var chart = this.chart;
   var self = this;
   var curwork;
+  var xs = {};
+  xs[name+"_y"] = name+"_x";
+  chart.load({xs: xs});
+  var names = {};
+  names[name+"_y"] = name;
+  chart.data.names(names);
+
   this.workers.push(curwork = {
     name:name,
     worker: new Worker(work("./worker")),
@@ -65,9 +75,12 @@ Chart.prototype.addURL =function(url,name){
       name:name
     }
   });
+
   curwork.worker.addEventListener("message",function(e){
     if(e.data.event === "batch"){
-      chart.load({ columns: e.data.data });
+      chart.load({
+        columns: e.data.data
+      });
     }
   });
   curwork.worker.addEventListener("message",function(e){

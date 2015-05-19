@@ -2,6 +2,8 @@ var sa = require("superagent");
 var io = require("socket.io-client");
 var async = require("async");
 var JSONStream = require("JSONStream");
+var mpath = require("mpath");
+
 
 module.exports = function(self){
   var url;
@@ -10,8 +12,8 @@ module.exports = function(self){
   var y_key;
   var name;
   function appendJson2Arrays(json,xari,yari){
-    xari.push(json[x_key]);
-    yari.push(json[y_key]);
+    xari.push(mpath.get(x_key, json));
+    yari.push(mpath.get(y_key, json));
   }
 
   var x_data = [];
@@ -19,11 +21,12 @@ module.exports = function(self){
 
 
   self.addEventListener("message",function(e){
+    console.log(e);
     if(e.data.event !== "initialize") return;
     if(url) throw new Error("already initialized");
     url = e.data.data.url;
-    x_key = e.data.data.x;
-    y_key = e.data.data.y;
+    x_key = e.data.data.x_key;
+    y_key = e.data.data.y_key;
     name = e.data.data.name;
     live = io(path);
     live.on("update",function(item){

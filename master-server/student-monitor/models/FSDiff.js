@@ -1,15 +1,47 @@
 var mongoose = require("mongoose");
 var Test = require("./Test");
 var Schema = mongoose.Schema;
+var parseDiff = require("../../Abstract/parse-diff-stream");
+var pt = require("stream").PassThrough;
 
 var schema = new mongoose.Schema({
   student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   test: {type:mongoose.Schema.Types.ObjectId, ref:"Test"},
+  createdAt: {
+    type:Date,
+    default:Date.now,
+    index:true
+  },
   path: String,
   subject:String,
   fs_type: {type:String,enum:["add","save","rem"]},
   passedTests:Boolean,
-  raw: String
+  diffObj:Object,
+  raw_: String
+});
+
+schema.virtual('raw').set(function (stream) {
+  console.log("have stream");
+  var self = this;
+  var t = stream.pipe(new pt());
+  t.pipe(new parseDiff()).on("full",function(full){
+    self.diffObj = full;
+  });
+  self.raw_ = "gridfs://"+self._id+"_raw_";
+  t
+  .pipe(mongoose.gfs.createWriteStream({
+    _id: this._id+"_raw_", // a MongoDb ObjectId
+    filename: stream.filename, // a filename may want to change this to something different
+    content_type: stream.headers["content-type"],
+    root: this.constructor.modelName,
+  }))
+  .on("finish",function(){
+    console.log("finished file: ",self._id+"_raw_");
+  })
+  .on("error",function(e){
+    console.error(e);
+  });
+  console.log("handled stream");
 });
 
 schema.statics.Permission = function(req,next){
@@ -30,11 +62,9 @@ schema.statics.defaultCreate = function(req,next){
   });
 };
 
+
 schema.pre('validate', function(next) {
   if (!this.isNew) return next();
-  console.log("subject: ",this.subject);
-  console.log("user: ",this.user);
-  console.log("raw: ",this.raw.length);
   if(!this.test) return next(new Error("test is undefined"));
   if(!this.test.isNew){
     return next();
@@ -52,19 +82,6 @@ schema.pre('validate', function(next) {
     console.log("done with fsdiff");
     next();
   });
-});
-
-
-schema.post("save",function(){
-  console.log("path: "+this.path);
-  console.log("subject: "+this.subject);
-  console.log("passedTests: "+this.passedTests);
-  console.log("fs_type: "+this.fs_type);
-  // streaming from gridfs
-  mongoose.gfs.createReadStream({
-    _id: this.raw.substring(6+3), // a MongoDb ObjectId
-    root: "FSDiff"
-  }).pipe(process.stdout);
 });
 
 var FSDiff = mongoose.model('FSDiff', schema);

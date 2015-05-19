@@ -134,6 +134,8 @@ router.get("/:classname",requestMany=function(req,res,next){
     }
   ],function(err,docs){
     if(err) return next(err);
+    //May want to implement stream
+    //http://mongoosejs.com/docs/api.html#querystream_QueryStream
     res.status(200).send(docs);
   });
 });

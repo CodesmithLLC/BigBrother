@@ -1,0 +1,14 @@
+I can do this in one of two ways
+
+1) Parsing on the Client
+	-Would need to save to indexed db
+	-some buffers will be more than available memory
+2) Parsing on Server and Requesting Single files at a time
+	-Would need to do custom things with the incoming stream
+	-Would save the filesystem to the object
+3) Can also simply just push up to github and Identify that particular filesystem as theirs
+	-pull changes to help request branch
+	-
+
+
+Need to start visualizing the data
