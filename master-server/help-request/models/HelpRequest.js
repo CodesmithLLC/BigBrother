@@ -5,7 +5,7 @@ var schema = new mongoose.Schema({
   ta: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
   classroom:{type:String,required:true,index:true},
   createdAt: {
-    type:Date,
+    type:Number,
     default:Date.now,
     index:true
   },

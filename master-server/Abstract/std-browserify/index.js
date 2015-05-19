@@ -7,10 +7,6 @@ var JSONStream = require("JSONStream");
 module.exports = function sendBrowserified(path,res,next){
   var b = browserify(path)
   .transform('brfs') //might use brfs for the templates
-  .transform({
-    global: true,
-    sourcemap: false
-  },'uglifyify')
   .bundle()
   .on("error",next);
   res
@@ -31,6 +27,10 @@ function buildBrowserify(path){
     deps.pipe(fs.createWriteStream(__dirname+"/dist/deps-"+name+".json"));
     var b = browserify(path,{fullPaths:true})
     .transform('brfs')
+    .transform({
+      global: true,
+      sourcemap: false
+    },'uglifyify')
     .on('dep', function (mod) {
       deps.write({id:mod.id,deps:mod.deps});
       Object.keys(mod.deps).forEach(function(k){

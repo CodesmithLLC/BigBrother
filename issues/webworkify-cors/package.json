@@ -1,0 +1,18 @@
+{
+  "name": "superagent-webworker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "formula1 <samtobia@gmail.com> (https://github.com/formula1)",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "latest",
+    "express": "latest",
+    "open": "0.0.5",
+    "webworkify": "latest"
+  }
+}

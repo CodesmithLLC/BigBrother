@@ -45,7 +45,7 @@ function ParseDiffStream(){
     if(self.curFile){
       self.emit('file',self.curFile);
     }
-    self.stats.total = self.additions+self.deletons;
+    self.stats.total = self.stats.additions+self.stats.deletions;
     self.emit("full",self.stats);
   });
 }
@@ -85,7 +85,7 @@ function createFile(line,matches){
     this.curChunk = void 0;
   }
   this.curFile = {
-    isNew: false,
+    new: false,
     index: void 0,
     mode: void 0,
     chunks: [],
@@ -95,7 +95,7 @@ function createFile(line,matches){
 }
 
 function isNew(line,matches){
-  this.curFile.isNew = true;
+  this.curFile.new = true;
 }
 
 function setIndex(line,matches){

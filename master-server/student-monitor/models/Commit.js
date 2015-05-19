@@ -5,17 +5,17 @@ var parseDiff = require("../../Abstract/parse-diff-stream");
 var pt = require("stream").PassThrough;
 
 var schema = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
+  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   test: {type:mongoose.Schema.Types.ObjectId, ref:"Test"},
   createdAt: {
-    type:Date,
+    type:Number,
     default:Date.now,
     index:true
   },
   subject:String,
   commitMessage:String,
   passedTests:Boolean,
-  diffObj:Object,
+  diffObj:require("./DiffObj"),
   raw_: String
 });
 
@@ -28,8 +28,7 @@ schema.virtual('raw').set(function (stream) {
     self.diffObj = full;
     console.log("settting diff Obj");
   });
-  t
-  .pipe(mongoose.gfs.createWriteStream({
+  t.pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_raw_", // a MongoDb ObjectId
     filename: stream.filename, // a filename may want to change this to something different
     content_type: stream.headers["content-type"],
@@ -56,7 +55,10 @@ schema.statics.Permission = function(req,next){
 };
 
 schema.statics.defaultCreate = function(req,next){
-  next(void(0),{user:req.user._id});
+  mongoose.model("Student").find({user:req.user._id}).exec(function(err,doc){
+    if(err) return next(err);
+    next(void 0, {student:doc._id});
+  });
 };
 
 schema.pre('validate', function(next) {
@@ -67,7 +69,7 @@ schema.pre('validate', function(next) {
   }
   var subject = this.subject;
   var self = this;
-  this.test.user = this.user;
+  this.test.student = this.student;
   this.test.parent = this._id;
   this.test.subject = this.subject;
   this.test.save(function(err,test){

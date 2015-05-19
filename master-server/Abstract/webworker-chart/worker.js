@@ -1,7 +1,5 @@
-var sa = require("superagent");
 var io = require("socket.io-client");
 var async = require("async");
-var JSONStream = require("JSONStream");
 var mpath = require("mpath");
 
 
@@ -21,14 +19,13 @@ module.exports = function(self){
 
 
   self.addEventListener("message",function(e){
-    console.log(e);
     if(e.data.event !== "initialize") return;
     if(url) throw new Error("already initialized");
     url = e.data.data.url;
     x_key = e.data.data.x_key;
     y_key = e.data.data.y_key;
     name = e.data.data.name;
-    live = io(path);
+    live = io(self.location.origin+url);
     live.on("update",function(item){
       var l = x_data.length - 1;
       if(x_data[l] < item[x_key]){
@@ -52,37 +49,40 @@ module.exports = function(self){
 
 
   self.addEventListener("message",function(e){
-    if(e.data.event !== "requestRange") return;
-    var ranges = e.data.data.ranges;
-    var type = e.data.data.type;
+    if(e.data.event !== "ranges") return;
+    var ranges = e.data.data;
     async.map(ranges,function(item,next){
-      sa.get(url,{min:item[0],max:item[1],sort:x_key})
-      .buffer(false)
-      .end(function(err,res){
-        if(err) throw err;
+      var req = new XMLHttpRequest();
+      req.open("GET", self.location.origin+url+"?min="+item[0]+"&max="+item[1]+"&sort="+x_key, true);
+      req.send();
+      req.addEventListener("error",next);
+      req.addEventListener("load",function(e){
+        if(req.status !== 200) return;
         var x = [];
         var y = [];
-        res.pipe(JSONStream.parse("*"))
-        .on("data",function(item){
+        JSON.parse(req.response).forEach(function(item){
           appendJson2Arrays(item,x,y);
-        }).on("finish",function(){
-          next(void 0, [x,y]);
-        }).on("error",next);
+        });
+        next(void 0, [x,y]);
       });
     },function(err,items){
-      if(err) return self.postMessage({
-        event:"error",
-        error:err
-      });
+      if(err){
+        self.postMessage({
+          event:"error",
+          error:err.stack
+        });
+        throw err;
+      }
+      console.log(items);
       if(e.data.data.length == 2){
-        x_data = e.data.data[0][0].concat(x_data).concat(e.data.data[1][0]);
-        y_data = e.data.data[0][1].concat(y_data).concat(e.data.data[1][1]);
-      }else if(e.data.data[0][0][0] < x_data[0]){
-        x_data = e.data.data[0][0].concat(x_data);
-        y_data = e.data.data[0][1].concat(y_data);
+        x_data = items[0][0].concat(x_data).concat(items[1][0]);
+        y_data = items[0][1].concat(y_data).concat(items[1][1]);
+      }else if(items[0][0][0] < x_data[0]){
+        x_data = items[0][0].concat(x_data);
+        y_data = items[0][1].concat(y_data);
       }else{
-        x_data = x_data.concat(e.data.data[0][0]);
-        y_data = y_data.concat(e.data.data[0][1]);
+        x_data = x_data.concat(items[0][0]);
+        y_data = y_data.concat(items[0][1]);
       }
       var ret = [];
       ret.push([name+"_x"].concat(x_data));

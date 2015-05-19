@@ -100,92 +100,17 @@ router.post("/:classname",createOne=function(req,res,next){
     res.status(200).send(doc.toObject());
   });
 });
-router.get("/:classname",requestMany=function(req,res,next){
-  var ipp = 10;
-  if(req.query.ipp){
-    ipp = req.query.ipp;
-    delete req.query.ipp;
-  }
-  var sort = "-createdOn";
-  if(req.query.sort){
-    sort = req.query.sort;
-    delete req.query.sort;
-  }
-  var populate = false;
-  if(req.query.populate){
-    populate = req.query.populate;
-    delete req.query.populate;
-  }
-  async.waterfall([
-    function(next){
-      if(req.mClass.defaultSearch){
-        req.mClass.defaultSearch(req,next);
-      }else{
-        next(void(0),{});
-      }
-    },
-    function(search,next){
-      _.extend(req.query||{},search);
-      var q = req.mClass.find(search).limit(ipp).sort(sort);
-      if(populate !== false){
-        q = q.populate(populate);
-      }
-      q.exec(next);
-    }
-  ],function(err,docs){
-    if(err) return next(err);
-    //May want to implement stream
-    //http://mongoosejs.com/docs/api.html#querystream_QueryStream
-    res.status(200).send(docs);
-  });
-});
+router.get(
+  "/:classname",
+  requestMany=require("./search")
+);
 router.get("/:classname/:id",requestOne=function(req,res,next){
   res.status(200).send(req.doc.toObject());
 });
-router.get("/:classname/:id/:property",requestOneProperty=function(req,res,next){
-  var paths = req.paths;
-  if(paths[req.params.property].instance === "objectid"){
-    if(!req.doc[req.params.property]){
-      return res.status(200).send(req.doc[req.params.property]);
-    }
-    if(!Array.isArray(req.doc[req.params.property])){
-      return req.doc[req.params.property].populate(function(err,child){
-        if(err) return next(err);
-        if(!child) res.status(404).end();
-        res.status(200).send(child);
-      });
-    }
-    res.status(200).write("[");
-    var l = req.doc[req.params.property].length - 1;
-    return async.eachSeries(req.doc[req.params.property],function(id,next){
-      id.populate(function(err,child){
-        if(err) return next(err);
-        res.write(JSON.stringify(child.toObject()));
-        if(l--) res.write(",");
-        next();
-      },function(err){
-        if(err) console.error(err);
-        res.end("]");
-      });
-    });
-  }
-  if(paths[req.params.property].instance !== "string"){
-    return res.status(200).send(req.doc[req.params.property]);
-  }
-  if(!/^gridfs::\/\//.test(req.doc[req.params.property])){
-    return res.status(200).send(req.doc[req.params.property]);
-  }
-  var prop = {
-    _id: req.doc[req.params.property].substring(9),
-    root: instance.constructor.modelName
-  };
-  mongoose.gfs.findOne(prop, function (err, file) {
-    if(err) return next(err);
-    if(!file) return res.status(404).end();
-    res.status(200).set("Content-Type",file["content-type"]);
-    mongoose.gfs.createReadStream(prop).on("error",next).pipe(res);
-  });
-});
+router.get(
+  "/:classname/:id/:property",
+  requestOneProperty=require("./requestProperty")
+);
 
 router.delete("/:classname/:id",deleteOne=function(req,res){
   req.doc.remove(function(err,doc){

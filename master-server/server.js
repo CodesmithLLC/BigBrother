@@ -117,7 +117,8 @@ function registerRoutes(config,next){
     next("Not found");
   });
   app.use(function(err,req,res,next){
-    console.error("http error: ",err);
+    if(err) console.error("http error: ",err,err.stack);
+    next(err);
   });
   next();
 }

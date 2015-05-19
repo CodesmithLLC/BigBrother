@@ -39,6 +39,7 @@ of the master-server
 * ~~Busboy hangs when a file is empty or invalid~~ No longer using busboy
 * None of the ui is working (though routing and psuedo code is practically complete)
 * Streaming on the Browser is near impossible currently without creating our own wrapper
+* SuperAgent and Request Both do not work within the browser
 
 # Known Refactoring necessary
 * Abstract/mongooseRouter - remove anonymous functions, create a context object
@@ -65,3 +66,5 @@ saved into gridfs
 * https://github.com/substack/node-git-emit/pull/4
 * https://github.com/felixge/node-form-data/issues/108
 * https://github.com/andrewrk/node-multiparty/issues/108
+* https://github.com/request/request/issues/1589
+* https://github.com/visionmedia/superagent/issues/659

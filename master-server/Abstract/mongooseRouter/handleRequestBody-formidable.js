@@ -11,7 +11,6 @@ module.exports = function(req,instance,next){
   if(req.method.toUpperCase() === "GET") return next();
   var paths = instance.constructor.schema.paths;
   var virtuals = instance.constructor.schema.virtuals;
-  console.log(instance.constructor.schema);
   var form = new formidable.IncomingForm();
 
   var ended = false;
@@ -25,7 +24,6 @@ module.exports = function(req,instance,next){
   }
 
   form.onPart = function(part) {
-    console.log(part.name,paths[part.name]);
     if(isHidden.test(part.name)) return;
     if(noEdit.test(part.name)) return;
     if(part.name in virtuals){

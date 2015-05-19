@@ -8,7 +8,7 @@ var schema = new mongoose.Schema({
   student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   test: {type:mongoose.Schema.Types.ObjectId, ref:"Test"},
   createdAt: {
-    type:Date,
+    type:Number,
     default:Date.now,
     index:true
   },
@@ -16,7 +16,7 @@ var schema = new mongoose.Schema({
   subject:String,
   fs_type: {type:String,enum:["add","save","rem"]},
   passedTests:Boolean,
-  diffObj:Object,
+  diffObj:require("./DiffObj"),
   raw_: String
 });
 
@@ -28,8 +28,7 @@ schema.virtual('raw').set(function (stream) {
     self.diffObj = full;
   });
   self.raw_ = "gridfs://"+self._id+"_raw_";
-  t
-  .pipe(mongoose.gfs.createWriteStream({
+  t.pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_raw_", // a MongoDb ObjectId
     filename: stream.filename, // a filename may want to change this to something different
     content_type: stream.headers["content-type"],
@@ -71,7 +70,7 @@ schema.pre('validate', function(next) {
   }
   var subject = this.subject;
   var self = this;
-  this.test.user = this.user;
+  this.test.student = this.student;
   this.test.parent = this._id;
   this.test.subject = this.subject;
   this.test.save(function(err,test){

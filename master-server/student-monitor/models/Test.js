@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 
 var schema = new mongoose.Schema({
-  user: {type: mongoose.Schema.Types.ObjectId, ref:"User"},
+  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
   parent: mongoose.Schema.Types.ObjectId,
   subject:String,
   score: Number,

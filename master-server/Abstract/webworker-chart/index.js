@@ -5,6 +5,7 @@ var utils = require("../browserify-utils.js");
 utils.appendCSS(temp);
 
 var work = require("webworkify");
+var workerScript = require("./worker");
 
 function Chart(elem,x_key,y_key,min,max,zoom){
   this.elem = elem;
@@ -63,7 +64,7 @@ Chart.prototype.addURL =function(url,name){
 
   this.workers.push(curwork = {
     name:name,
-    worker: new Worker(work("./worker")),
+    worker: work(workerScript),
     url:url
   });
   curwork.worker.postMessage({
@@ -107,12 +108,14 @@ Chart.prototype.addURL =function(url,name){
 
 Chart.prototype.requestRanges = function(requestedRange){
   var requests = [];
+  console.log(requestedRange);
+  console.log(this.curRange);
   if(requestedRange[0] < this.currentRange[0]){
     requests.push([requestedRange[0],this.curRange[0]]);
     this.curRange[0] = requestedRange[0];
   }
   if(requestedRange[1] > this.currentRange[1]){
-    requests.push([requestedRange[1],this.curRange[1]]);
+    requests.push([this.curRange[1],requestedRange[1]]);
     this.curRange[1] = requestedRange[1];
   }
   if(requestedRange.length === 0) return;
