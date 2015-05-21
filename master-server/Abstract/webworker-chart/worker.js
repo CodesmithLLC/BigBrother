@@ -17,6 +17,26 @@ module.exports = function(self){
   var x_data = [];
   var y_data = [];
 
+  self.addEventListener("message",function(e){
+    if(e.data.event !== "live") return;
+    var l = x_data.length - 1, item = e.data.data, x = mpath.get(x_key,item);
+    if(x_data[l] < x){
+      return appendJson2Arrays(item,x_data,y_data);
+    }
+    if(x_data[0] > x){
+      x_data.unshift(x);
+      y_data.unshift(mpath.get(y_key,item));
+      return;
+    }
+    //I should make this a binary search
+    while(l--){
+      if(x_data[l] < item[x_key]){
+        x_data.splice(l,0,x);
+        y_data.splice(l,0,mpath.get(y_key,item));
+        return;
+      }
+    }
+  });
 
   self.addEventListener("message",function(e){
     if(e.data.event !== "initialize") return;
@@ -25,26 +45,8 @@ module.exports = function(self){
     x_key = e.data.data.x_key;
     y_key = e.data.data.y_key;
     name = e.data.data.name;
-    live = io(self.location.origin+url);
-    live.on("update",function(item){
-      var l = x_data.length - 1;
-      if(x_data[l] < item[x_key]){
-        appendJson2Arrays(item,x_data,y_data);
-      }
-      while(l--){
-        if(x_data[l] < item[x_key]){
-          x_data.splice(l,0,item[x_key]);
-          y_data.splice(l,0,item[y_key]);
-        }
-      }
-      self.postMessage({
-        event:"live",
-        data:[
-          [name+"_x",item[x_key]],
-          [name+"_y",item[y_key]]
-        ]
-      });
-    });
+    console.log(url,name);
+
   });
 
 
@@ -53,10 +55,18 @@ module.exports = function(self){
     var ranges = e.data.data;
     async.map(ranges,function(item,next){
       var req = new XMLHttpRequest();
-      req.open("GET", self.location.origin+url+"?min="+item[0]+"&max="+item[1]+"&sort="+x_key, true);
+      console.log(
+        self.location.origin+url+"?min="+item[0]+"&max="+item[1]+"&sort="+x_key
+      );
+      req.open("GET", self.location.origin+url+
+        "?min="+item[0]+
+        "&max="+item[1]+
+        "&sort=-"+x_key,
+      true);
       req.send();
       req.addEventListener("error",next);
       req.addEventListener("load",function(e){
+        console.log(req.response);
         if(req.status !== 200) return;
         var x = [];
         var y = [];
@@ -74,6 +84,7 @@ module.exports = function(self){
         throw err;
       }
       console.log(items);
+      if(items.length === 0) return;
       if(e.data.data.length == 2){
         x_data = items[0][0].concat(x_data).concat(items[1][0]);
         y_data = items[0][1].concat(y_data).concat(items[1][1]);

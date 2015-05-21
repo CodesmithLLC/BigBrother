@@ -57,7 +57,7 @@ function connectDatabase(config,next){
   mongoose.connection.once( "error", erlist);
   mongoose.connection.once( "open", oplist);
   //This is replacing the cluster EventEmitter for now
-  mongoose.ee = new require("events").EventEmitter();
+  require("./Abstract/mongooseEE")(mongoose);
 }
 
 
@@ -108,7 +108,8 @@ function registerRoutes(config,next){
   app.use(require("./portals/router"));
 
   user.middleware.ws.forEach(io.use.bind(io));
-  io.of("/student-monitor").on("connect",require("./student-monitor/ws"));
+  var sm = io.of("/student-monitor");
+  sm.on("connect",require("./student-monitor/ws")(sm));
   var ns = io.of("/help-request");
   ns.on("connect",require("./help-request/ws")(ns));
 

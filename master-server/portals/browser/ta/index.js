@@ -3,7 +3,8 @@ var Student = require("../../../student-monitor/browser/ta/Student");
 var JSONStream = require("JSONStream");
 var jQuery = require("jquery");
 var sa = require("superagent");
-requestAnimationFrame(function(){
+var io = require("socket.io-client");
+window.addEventListener("load",function(){
   /*
     var hr = new HelpRequest();
     var students = [];
@@ -14,9 +15,21 @@ requestAnimationFrame(function(){
   .get("/Student")
   .end(function(err,res){
     if(err) throw err;
+    var studentrefs = {};
     res.body.forEach(function(student){
       student = new Student(student);
       stats.append(student.elem);
+      studentrefs[student._id] = student;
+    });
+    var live = io(window.location.origin+"/student-monitor");
+    live.on("fsdiff",function(diff){
+      console.log("fsdiff",diff);
+      studentrefs[diff.student._id||diff.student].chart.insert("file change",diff);
+    });
+    live.on("commit",function(diff){
+      console.log("commit");
+      studentrefs[diff.student._id||diff.student].chart.insert("commit",diff);
     });
   });
+
 });

@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 var router = require("express").Router();
 var url = require("url");
 var _ = require("lodash");
-var bodyHandler = require("./handleRequestBody-formidable");
+var bodyHandler = require("./handleRequestBody-multiparty");
 var async = require("async");
 
 var isHidden = /^_.*/;
@@ -20,6 +20,10 @@ router.param("property", function(req,res,next,property){
   if(isHidden.test(property)) return res.status(404).end();
   if(property in req.mClass.schema.paths){
     req.paths = req.mClass.schema.paths;
+    return next();
+  }
+  if(property in req.mClass.schema.virtuals){
+    req.paths = req.mClass.schema.virtuals;
     return next();
   }
   //We may be searching with this model
@@ -89,7 +93,9 @@ router.post("/:classname",createOne=function(req,res,next){
       }
     },
     function(create,next){
+      console.log("doc: ",create);
       doc = new req.mClass(create);
+      console.log("doc: ",doc);
       bodyHandler(req,doc,function(e){
         if(e) return next(e);
         doc.save(next);

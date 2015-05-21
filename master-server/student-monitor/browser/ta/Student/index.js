@@ -5,10 +5,10 @@ var mutils = require("../../../../Abstract/mongooseUtils");
 var sa = require("superagent");
 var jQuery = require("jquery");
 var Mustache = require("mustache");
-var moment = require("moment");
 Mustache.parse(template);
 
 function Student(student){
+  console.log(student);
   this._id = student._id;
   this.elem = jQuery(Mustache.render(template,student));
   var self = this;
@@ -17,17 +17,25 @@ function Student(student){
   .end(function(err,res){
     if(err) throw err;
     var d = Date.now();
-    var ca = res.body[0].createdAt;
+    var min = d - 1000*60*60;
+    var ca = res.body.length?res.body[0].createdAt:min;
     self.chart = new Chart(
       self.elem.find(".chart"),
       "createdAt",
       "diffObj.total",
-      res.body.createdAt,
-      d,
-      [Math.min(ca,d - 1000*60*60*24),d]
+      {
+        x:{
+          min:ca,
+          max:d,
+          tick: {
+              format: function (x) { return new Date(x).toLocaleString(); }
+          }
+        }
+      },
+      [Math.min(ca,min),d]
     );
-    self.chart.addURL("/Student/"+self._id+"/FSDiff");
-    self.chart.addURL("/Student/"+self._id+"/Commit");
+    self.chart.addURL("/Student/"+self._id+"/FSDiff","file change");
+    self.chart.addURL("/Student/"+self._id+"/Commit","Commit");
   });
 }
 

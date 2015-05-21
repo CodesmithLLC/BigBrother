@@ -18,8 +18,7 @@ module.exports = function(req,instance,next){
     if(ended) return;
     ended = true;
     console.error("error: ",e);
-    form.pause();
-    form.onPart = function () {};
+    form.destroy();
     next(e);
   }
 
@@ -28,34 +27,24 @@ module.exports = function(req,instance,next){
     if(noEdit.test(part.name)) return;
     if(part.name in virtuals){
       if (!part.filename) return form.handlePart(part);
-      form._flushing++;
-      console.log("start");
       instance[part.name] = part;
-      return part.on("error",destroy).on("end",function(){
-        setImmediate(function(){
-          console.log("end?");
-          form._flushing--;
-          form._maybeEnd();
-        });
+      part.on("error",destroy);
+      setImmediate(function(){
+        form.resume();
+        req.resume();
       });
+      return;
     }
     if(!(part.name in paths)) return;
     if (!part.filename) return form.handlePart(part);
     if(paths[part.name].instance.toLowerCase() === "objectid"){
       var Model = mongoose.model(paths[part.name].options.ref);
       if(!Model) return destroy(new Error("Model does not exist"));
-      console.log("before json",form._flushing);
-      form._flushing++;
       return handleObject(part,function(err,obj){
         if(err) return destroy(err);
         instance[part.name] = new Model(obj);
-        form._flushing--;
-        console.log("json",form._flushing);
-        form._maybeEnd();
       });
     }
-    console.log("before file",form._flushing);
-    form._flushing++;
     handleFile(part,{
       _id: instance._id+"_"+part.name, // a MongoDb ObjectId
       filename: part.filename, // a filename may want to change this to something different
@@ -64,10 +53,6 @@ module.exports = function(req,instance,next){
     },function(e,value){
       if(e) return destroy(e);
       instance[part.name] = "gridfs://"+instance._id+"_"+part.name;
-      console.log("test", Object.keys(instance));
-      form._flushing--;
-      console.log("file",form._flushing);
-      form._maybeEnd();
     });
   };
   form.on("field", function(name, value) {
@@ -76,7 +61,7 @@ module.exports = function(req,instance,next){
   form.on("end", function(name, value) {
     console.log("Done parsing form");
     console.log("test", Object.keys(instance));
-    next();
+    setImmediate(next);
   });
   form.on("error",next);
   form.parse(req);

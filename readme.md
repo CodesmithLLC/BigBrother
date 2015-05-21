@@ -37,9 +37,11 @@ of the master-server
 
 * ~~Big brother sends fs add events on start~~
 * ~~Busboy hangs when a file is empty or invalid~~ No longer using busboy
-* None of the ui is working (though routing and psuedo code is practically complete)
+* Some ui is working
 * Streaming on the Browser is near impossible currently without creating our own wrapper
-* SuperAgent and Request Both do not work within the browser
+* SuperAgent and Request Both do not work within webworkers
+* Formdiable Hangs (sometimes) form some reason - Switched to Multiparty to avoid issues, hard to reproduce without showing full code
+* Flow and Subchart Apis don't mix and match https://github.com/masayuki0812/c3/issues/383
 
 # Known Refactoring necessary
 * Abstract/mongooseRouter - remove anonymous functions, create a context object
@@ -68,3 +70,4 @@ saved into gridfs
 * https://github.com/andrewrk/node-multiparty/issues/108
 * https://github.com/request/request/issues/1589
 * https://github.com/visionmedia/superagent/issues/659
+* http://www.bennadel.com/blog/2817-the-affect-of-back-pressure-when-piping-data-into-multiple-writable-streams-in-node-js.htm

@@ -5,7 +5,7 @@ var parseDiff = require("../../Abstract/parse-diff-stream");
 var pt = require("stream").PassThrough;
 
 var schema = new mongoose.Schema({
-  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
+  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student",required:true},
   test: {type:mongoose.Schema.Types.ObjectId, ref:"Test"},
   createdAt: {
     type:Number,
@@ -21,26 +21,24 @@ var schema = new mongoose.Schema({
 });
 
 schema.virtual('raw').set(function (stream) {
-  console.log("have stream");
+  console.log("have stream",stream);
   var self = this;
-  var t = stream.pipe(new pt());
-  t.pipe(new parseDiff()).on("full",function(full){
+  //the stream tends to not be capabale of piping to two sources...
+  //hopefully will reduce backpressure
+  stream.pipe(new parseDiff()).on("full",function(full){
+    self.raw_ = "gridfs://"+self._id+"_raw_";
     self.diffObj = full;
   });
-  self.raw_ = "gridfs://"+self._id+"_raw_";
-  t.pipe(mongoose.gfs.createWriteStream({
+  stream.pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_raw_", // a MongoDb ObjectId
     filename: stream.filename, // a filename may want to change this to something different
     content_type: stream.headers["content-type"],
     root: this.constructor.modelName,
-  }))
-  .on("finish",function(){
+  })).on("finish",function(){
     console.log("finished file: ",self._id+"_raw_");
-  })
-  .on("error",function(e){
+  }).on("error",function(e){
     console.error(e);
   });
-  console.log("handled stream");
 });
 
 schema.statics.Permission = function(req,next){
@@ -55,8 +53,10 @@ schema.statics.Permission = function(req,next){
 };
 
 schema.statics.defaultCreate = function(req,next){
-  mongoose.model("Student").find({user:req.user._id}).exec(function(err,doc){
+  mongoose.model("Student").findOne({user:req.user._id}).exec(function(err,doc){
     if(err) return next(err);
+    if(!doc) return next(new Error("student doesn't exist"));
+    console.log(doc);
     next(void 0, {student:doc._id});
   });
 };

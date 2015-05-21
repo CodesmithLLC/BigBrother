@@ -24,6 +24,13 @@ program
 program
 .command('start')
 .action(function(){
+	try{
+		var pid = fs.readFileSync(pidStore).toString("utf8");
+		fs.unlinkSync(pidStore);
+		process.kill(pid);
+		console.log("killed old brother");
+	}catch(e){
+	}
 	var	d = Date.now(),
 			out = fs.openSync(__dirname+'/debug/'+d+'.out.log', 'a'),
 			err = fs.openSync(__dirname+'/debug/'+d+'.err.log', 'a');

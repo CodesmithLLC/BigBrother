@@ -6,8 +6,9 @@ utils.appendCSS(temp);
 
 var work = require("webworkify");
 var workerScript = require("./worker");
+var mpath = require("mpath");
 
-function Chart(elem,x_key,y_key,min,max,zoom){
+function Chart(elem,x_key,y_key,axis,zoom){
   this.elem = elem;
   this.chart = c3.generate({
     bindto: elem[0],
@@ -18,17 +19,12 @@ function Chart(elem,x_key,y_key,min,max,zoom){
     subchart: {
       show: true,
       onbrush:this.requestRanges.bind(this)
-    }
+    },
+    zoom: {
+      extent: zoom
+    },
+    axis:axis
   });
-  this.min = min;
-  this.max = max;
-  this.chart.axis.max({
-      x:max
-  });
-  this.chart.axis.min({
-    x:min
-  });
-  this.chart.zoom(zoom);
   this.curRange = zoom;
   this.x_key = x_key;
   this.y_key = y_key;
@@ -84,22 +80,6 @@ Chart.prototype.addURL =function(url,name){
       });
     }
   });
-  curwork.worker.addEventListener("message",function(e){
-    if(e.data.event === "live" && chart.zoom().x >= self.max){
-      chart.axis.max({
-          x: self.max = e.data.data[e.data.data.length-1][0]
-      });
-
-      chart.flow({
-        columns: e.data.data,
-        length: 0,
-        duration:250,
-        done:function(){
-          console.log("done");
-        }
-      });
-    }
-  });
   curwork.worker.postMessage({
     event:"ranges",
     data:[this.curRange]
@@ -110,21 +90,52 @@ Chart.prototype.requestRanges = function(requestedRange){
   var requests = [];
   console.log(requestedRange);
   console.log(this.curRange);
-  if(requestedRange[0] < this.currentRange[0]){
+  if(requestedRange[0] < this.curRange[0]){
     requests.push([requestedRange[0],this.curRange[0]]);
     this.curRange[0] = requestedRange[0];
   }
-  if(requestedRange[1] > this.currentRange[1]){
+  if(requestedRange[1] > this.curRange[1]){
     requests.push([this.curRange[1],requestedRange[1]]);
     this.curRange[1] = requestedRange[1];
   }
-  if(requestedRange.length === 0) return;
+  if(requests.length === 0) return;
   this.workers.forEach(function(worker){
     worker.worker.postMessage({
       event:"ranges",
       data:requests
     });
   });
+};
+
+Chart.prototype.insert = function(name,item){
+  var x = mpath.get(this.x_key,item);
+  console.log(name,x);
+  var chart = this.chart;
+  for(var i=0,l=this.workers.length;i<l;i++){
+    if(this.workers[i].name !== name) continue;
+    var max = chart.axis.max().x;
+    console.log(chart.zoom(), x, max);
+    if(chart.zoom()[1] >= max){
+      chart.axis.max({
+          x: max = x
+      });
+      console.log(x,mpath.get(this.y_key,item));
+      chart.flow({
+        columns: [
+          [name+"_x",x],
+          [name+"_y",mpath.get(this.y_key,item)]
+        ],
+        length: 1,
+        duration:250,
+        done:console.log.bind(console,"done")
+      });
+    }
+    this.workers[i].worker.postMessage({
+      event:"live",
+      data:item
+    });
+    return;
+  }
 };
 
 module.exports = Chart;

@@ -56,13 +56,13 @@ ParseDiffStream.prototype.constructor = ParseDiffStream;
 var nl = "\n".charCodeAt(0);
 
 ParseDiffStream.prototype._write = function(chunk,encoding,next){
-  console.log("writing");
+  console.log("writing",chunk.length);
   var lastIndex = 0, curstr;
   for(var i=0,l=chunk.length;i<l;i++){
     lastIndex = i;
-    while(i !== nl && i<l) i++;
+    while(chunk[i] !== nl && i<l) i++;
     if(i === l) break;
-    curstr = this.buffer + chunk.slice(lastIndex,i,"utf8");
+    curstr = this.buffer + chunk.slice(lastIndex,i-1,"utf8");
     this.buffer = "";
     for (_i = 0; _i < sl; _i++) {
       p = schema[_i];
@@ -88,7 +88,7 @@ function createFile(line,matches){
     new: false,
     index: void 0,
     mode: void 0,
-    chunks: [],
+    parts: [],
     deletions: 0,
     additions: 0
   };
@@ -133,12 +133,12 @@ function chunkOverview(line,matches){
   }
   this.curChunk = {
     before:{
-      start:matches[0],
-      length:matches[1]
+      start:matches[1],
+      length:matches[2]
     },
     after:{
-      start:matches[2],
-      length:matches[3]
+      start:matches[3],
+      length:matches[4]
     },
     deletions: 0,
     additions: 0
