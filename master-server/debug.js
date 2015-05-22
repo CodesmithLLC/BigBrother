@@ -5,7 +5,7 @@ var STU = require("./portals/models/student");
 var async = require("async");
 
 module.exports = function(next){
-  async.parallel([upsertStudent,upsertTA,staticStudent,staticTA],next);
+  async.parallel([upsertStudent,upsertTA,staticStudent,staticTA,noOneIsOnline],next);
 };
 
 
@@ -130,4 +130,10 @@ function staticTA(next){
       });
     });
   });
+}
+
+
+function noOneIsOnline(next){
+  //We want to ensure all models in current semester are
+  TA.find().update({online:false}).exec(next);
 }

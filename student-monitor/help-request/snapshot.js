@@ -14,6 +14,8 @@ module.exports = function(path,next){
     });
     return next(void(0),tar.pack(path,{
       ignore:function(name){
+        if(/^\.git(?:\/.*)$/.test(name)) return true;
+        if(/lib\//.test(name)) return true;
         return globMatches.some(function(fn){
           return fn(name);
         });

@@ -19,6 +19,7 @@ function Student(student){
     var d = Date.now();
     var min = d - 1000*60*60;
     var ca = res.body.length?res.body[0].createdAt:min;
+    console.log(Math.max(min,ca),min,ca);
     self.chart = new Chart(
       self.elem.find(".chart"),
       "createdAt",
@@ -29,12 +30,12 @@ function Student(student){
           max:d,
           tick: {
               format: function (x) { return new Date(x).toLocaleString(); }
-          }
+          },
+          extent: [Math.max(ca,min),d]
         }
-      },
-      [Math.min(ca,min),d]
+      }
     );
-    self.chart.addURL("/Student/"+self._id+"/FSDiff","file change");
+    self.chart.addURL("/Student/"+self._id+"/FSDiff","File Change");
     self.chart.addURL("/Student/"+self._id+"/Commit","Commit");
   });
 }

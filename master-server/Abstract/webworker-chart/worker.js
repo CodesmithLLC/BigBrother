@@ -20,20 +20,25 @@ module.exports = function(self){
   self.addEventListener("message",function(e){
     if(e.data.event !== "live") return;
     var l = x_data.length - 1, item = e.data.data, x = mpath.get(x_key,item);
+    if(x_data.length === 0){
+      appendJson2Arrays(item,x_data,y_data);
+      return sendBatch();
+    }
     if(x_data[l] < x){
-      return appendJson2Arrays(item,x_data,y_data);
+      appendJson2Arrays(item,x_data,y_data);
+      return sendBatch();
     }
     if(x_data[0] > x){
       x_data.unshift(x);
       y_data.unshift(mpath.get(y_key,item));
-      return;
+      return sendBatch();
     }
     //I should make this a binary search
     while(l--){
       if(x_data[l] < item[x_key]){
         x_data.splice(l,0,x);
         y_data.splice(l,0,mpath.get(y_key,item));
-        return;
+        return sendBatch();
       }
     }
   });
@@ -95,16 +100,20 @@ module.exports = function(self){
         x_data = x_data.concat(items[0][0]);
         y_data = y_data.concat(items[0][1]);
       }
-      var ret = [];
-      ret.push([name+"_x"].concat(x_data));
-      ret.push([name+"_y"].concat(y_data));
-
-      self.postMessage({
-        event:"batch",
-        data:ret
-      });
+      sendBatch();
     });
   });
+
+  function sendBatch(){
+    var ret = [];
+    ret.push([name+"_x"].concat(x_data));
+    ret.push([name+"_y"].concat(y_data));
+
+    self.postMessage({
+      event:"batch",
+      data:ret
+    });
+  }
 
 
 };

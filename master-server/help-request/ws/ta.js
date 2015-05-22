@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 var TA = require("../../portals/models/ta");
 var HelpRequest = require("../models/HelpRequest");
+var async = require("async");
 
 
 module.exports = function(io){
@@ -37,18 +38,17 @@ module.exports = function(io){
 
   return function(ws){
     var user = ws.request.user;
-    TA.find({user:user},function(err,ta){
-      if(err){
-        console.error(err);
-        return ws.disconnect();
-      }
-      if(!ta){
-        console.error("didn't find ta");
-        return ws.disconnect();
-      }
-      var cl, gl, fl;
-      ws.join(ta.classroom+"-requests");
-      ws.join("global-requests");
+    var cl, gl, fl;
+    async.waterfall([
+      TA.find.bind(TA,{user:user}),
+      function(ta,next){
+        if(arguments.length === 1) return next("didn't find ta");
+        ws.join(ta.classroom+"-requests");
+        ws.join("global-requests");
+        next(void 0, ws);
+      },
+    ],function(e){
+      if(e) return ws.disconnect();
       ws.on("help-take",function(help_id){
         if(!(help_id in hr_id2to)){
           return ws.emit("help-taken",help_id);

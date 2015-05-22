@@ -32,6 +32,9 @@ of the master-server
 * Big brother sends tarball on request
 * Big brother can be stopped
 * Big brother runs in the background
+* Master Server Recieves and Stors Diffs, Tars, commits and filesystem changes
+* Master server updates TAs on commit and filesystem changes
+* Tas Update the graphs
 
 # Known issues
 
@@ -48,7 +51,19 @@ of the master-server
 * Abstract/mongooseRouter#17 - Expensive operation for the sake of pretty urls
 * Abstract/mongooseRouter#123 - Peice out use cases
 * */Models/* - Permissions should not be with the model
+* During Server Starts, we want to ensure all ta's are considered not online
+  -When moving to production, we want to ensure this happens whenever the ws server starts
+  -Current place is in master-server/debug.js
 
+
+# Long Term Enhancements
+* For student-monitor
+  * Display Passes and Failures in graph
+  * Display full information in regards to a specific peice of information
+  * Allow the TA to set things to listen for - File deletes, etc
+* for Help request
+  * When a diff is triggered for a particular file - live update the snapshot
+  * When a diff is triggered for a particular file - send the diff to tas looking at them
 
 # What should be working but likely is not
 

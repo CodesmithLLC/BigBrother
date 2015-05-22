@@ -8,7 +8,7 @@ var work = require("webworkify");
 var workerScript = require("./worker");
 var mpath = require("mpath");
 
-function Chart(elem,x_key,y_key,axis,zoom){
+function Chart(elem,x_key,y_key,axis){
   this.elem = elem;
   this.chart = c3.generate({
     bindto: elem[0],
@@ -20,12 +20,15 @@ function Chart(elem,x_key,y_key,axis,zoom){
       show: true,
       onbrush:this.requestRanges.bind(this)
     },
-    zoom: {
-      extent: zoom
+    zoom:{
+      enable: true
     },
-    axis:axis
+    axis:axis,
+    tooltip: {
+      contents: void 0
+    }
   });
-  this.curRange = zoom;
+  this.curRange = this.chart.zoom();
   this.x_key = x_key;
   this.y_key = y_key;
   this.workers = [];
@@ -116,19 +119,11 @@ Chart.prototype.insert = function(name,item){
     var max = chart.axis.max().x;
     console.log(chart.zoom(), x, max);
     if(chart.zoom()[1] >= max){
+      max = x;
       chart.axis.max({
-          x: max = x
+          x: Date.now()
       });
       console.log(x,mpath.get(this.y_key,item));
-      chart.flow({
-        columns: [
-          [name+"_x",x],
-          [name+"_y",mpath.get(this.y_key,item)]
-        ],
-        length: 1,
-        duration:250,
-        done:console.log.bind(console,"done")
-      });
     }
     this.workers[i].worker.postMessage({
       event:"live",
