@@ -30,8 +30,7 @@ function Student(student){
           max:d,
           tick: {
               format: function (x) { return new Date(x).toLocaleString(); }
-          },
-          extent: [Math.max(ca,min),d]
+          }
         }
       }
     );

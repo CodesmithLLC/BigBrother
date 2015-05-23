@@ -21,7 +21,6 @@ var schema = new mongoose.Schema({
 
 
 schema.virtual('raw').set(function (stream) {
-  console.log("have stream");
   var self = this;
   //the stream tends to not be capabale of piping to two sources...
   var main = stream.pipe(new pt());

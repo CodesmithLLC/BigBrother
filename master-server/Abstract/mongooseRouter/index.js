@@ -98,11 +98,13 @@ router.post("/:classname",createOne=function(req,res,next){
       console.log("doc: ",doc);
       bodyHandler(req,doc,function(e){
         if(e) return next(e);
+        console.log("next??");
         doc.save(next);
       });
     }
   ],function(err){
     if(err) return next(err);
+    console.log("next?");
     res.status(200).send(doc.toObject());
   });
 });

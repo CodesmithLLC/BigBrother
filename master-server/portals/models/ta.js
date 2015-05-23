@@ -32,7 +32,7 @@ schema.statics.markIgnore = function(level,help,next){
   q.update({$inc:{ignores:1}}).select("_id").exec(function(e,docs){
     if(e) return next(e);
     help.constructor.where({_id:help._id})
-    .update({ignoredBy:{$addToSet:docs}}).exec(next);
+    .update({$addToSet:{ignoredBy:{$each:docs}}}).exec(next);
   });
 };
 

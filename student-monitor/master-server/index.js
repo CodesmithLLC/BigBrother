@@ -45,7 +45,7 @@ module.exports.sendCommit = function(commit){
     .field("subject",commit.subject)
     .field("commitMessage",commit.message)
     .attach("test",commit.test.stdout,"test.txt")
-    .attach("raw",commit.diff.stdout,"diff.txt");
+    .attach("raw",commit.diff,"diff.txt");
   req.end(function(err,res){
     if(err) throw err;
     console.log("success");
@@ -59,12 +59,8 @@ module.exports.sendFSDiff = function(fsdiff){
     .field("subject",fsdiff.subject)
     .field("path",fsdiff.path)
     .field("fs_type",fsdiff.type)
-    .attach("test",fsdiff.test.stdout,"test.txt");
-    if(typeof fsdiff.diff === "string"){
-      req.field("raw",fsdiff.diff);
-    }else{
-      req.attach("raw",fsdiff.diff.stdout,"diff.txt");
-    }
+    .attach("test",fsdiff.test.stdout,"test.txt")
+    .attach("raw",fsdiff.diff,"diff.txt");
   req.end(function(err,res){
     if(err) throw err;
     console.log("success");

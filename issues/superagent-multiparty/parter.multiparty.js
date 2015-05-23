@@ -1,13 +1,13 @@
 var multiparty = require("multiparty");
 
 module.exports = function(isValid,req,res,next){
-  var form = new multiparty.Form({maxFields:10, autoFiles:false});
+  var form = new multiparty.Form({maxFields:50, autoFiles:false});
   form.on("part", function(part){
     console.log("part: ",part.name);
     part.on("error",next);
     part.resume();
     if (!part.filename) return;
-    if(!isValid(part)) return;
+    if(!isValid(part,part.name,part.filename)) return;
     part.on("data",function(data){
       console.log("data recieved");
     })

@@ -14,6 +14,7 @@ var schema = new mongoose.Schema({
     default:Date.now,
     index:true
   },
+  subject:{type:String,required:true},
   description:String,
   state:{
     type:String,
@@ -47,16 +48,15 @@ schema.statics.defaultCreate = function(req,next){
 };
 
 schema.statics.defaultSearch = function(req,next){
-  mongoose.model("TeachersAssistant").find({user:req.user},function(err,ta){
+  mongoose.model("TeachersAssistant").findOne({user:req.user},function(err,ta){
     if(err) return next(err);
+    if(!ta) return next (new Error("no ta"));
     next(void(0),{$or:[
       {classroom:ta.classroom,escalation:"local"},
       {escalation:"global"}
-      ],
-      state:"waiting"
+      ], state:"waiting"
     });
   });
-  return {student:req.user};
 };
 
 schema.virtual('raw').set(function (stream) {
@@ -65,12 +65,16 @@ schema.virtual('raw').set(function (stream) {
   var system = {};
   var files = [];
   var self = this;
+  instance.queueState.pending();
   stream.pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_snapshot.raw", // a MongoDb ObjectId
     filename: stream.filename, // a filename may want to change this to something different
     content_type: stream.headers["content-type"],
     root: this.constructor.modelName,
-  }));
+  }))
+    .on("error",instance.queueState.error)
+    .on("finish",instance.queueState.done);
+  instance.queueState.pending();
   stream.pipe(tar.extract())
   //We want the error to be thrown
   .on('entry', function(header, stream, callback) {
@@ -106,7 +110,8 @@ schema.virtual('raw').set(function (stream) {
       filesystem: system,
       files: files
     };
-  });
+    instance.queueState.done();
+  }).on("error",instance.queueState.error);
 });
 
 var HelpRequest = mongoose.model('HelpRequest', schema);

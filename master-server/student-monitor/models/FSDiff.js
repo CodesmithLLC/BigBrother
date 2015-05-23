@@ -21,24 +21,29 @@ var schema = new mongoose.Schema({
 });
 
 schema.virtual('raw').set(function (stream) {
-  console.log("have stream",stream);
   var self = this;
   //the stream tends to not be capabale of piping to two sources...
   //hopefully will reduce backpressure
-  stream.pipe(new parseDiff()).on("full",function(full){
+  /*
+  this.queueState.pending();
+  stream.pipe(new pt()).pipe(new parseDiff()).on("full",function(full){
     self.raw_ = "gridfs://"+self._id+"_raw_";
     self.diffObj = full;
-  });
-  stream.pipe(mongoose.gfs.createWriteStream({
+  })
+  .on("finish",this.queueState.done)
+  .on("error",this.queueState.error);
+  */
+  /*
+  this.queueState.pending();
+  stream.pipe(new pt()).pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_raw_", // a MongoDb ObjectId
     filename: stream.filename, // a filename may want to change this to something different
     content_type: stream.headers["content-type"],
     root: this.constructor.modelName,
-  })).on("finish",function(){
-    console.log("finished file: ",self._id+"_raw_");
-  }).on("error",function(e){
-    console.error(e);
-  });
+  }))
+    .on("finish",this.queueState.done)
+    .on("error",this.queueState.error);
+    */
 });
 
 schema.statics.Permission = function(req,next){

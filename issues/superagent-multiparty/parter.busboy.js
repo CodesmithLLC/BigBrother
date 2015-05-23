@@ -5,7 +5,7 @@ module.exports = function(isValid,req,res,next){
   var ret = {};
   var busboy = new Busboy({ headers: req.headers });
   busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-    if(!isValid(file)) return;
+    if(!isValid(file,fieldname,filename)) return;
     file.resume();
     file.on("data",function(data){
       console.log("data recieved");

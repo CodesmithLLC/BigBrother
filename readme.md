@@ -54,6 +54,7 @@ of the master-server
 * During Server Starts, we want to ensure all ta's are considered not online
   -When moving to production, we want to ensure this happens whenever the ws server starts
   -Current place is in master-server/debug.js
+* Need to ensure that we know the semester so we can limit our searches each time
 
 
 # Long Term Enhancements
@@ -64,6 +65,10 @@ of the master-server
 * for Help request
   * When a diff is triggered for a particular file - live update the snapshot
   * When a diff is triggered for a particular file - send the diff to tas looking at them
+* Can do an abstract data to view binding with certian lists
+  -HelpRequest List
+  -Student List for fraphs
+
 
 # What should be working but likely is not
 

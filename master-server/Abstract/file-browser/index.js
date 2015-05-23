@@ -3,12 +3,14 @@ var path = "/";
 var pot = require("../path-object-traversal");
 var sa = require("superagent");
 var hljs = require("highlight.js");
-require("../../../Abstract/browserify-utils").appendCSS(fs.readFileSync(
-  require.resolve("highlight.js")+"/styles/default.css"
+var fs = require("fs");
+var path = require('path');
+require("../browserify-utils").appendCSS(fs.readFileSync(
+  path.resolve(require.resolve("highlight.js")+"/../../styles/default.css")
 ));
 
 
-function file_explorer(elem,snapshot) {
+function FileBrowser(elem,snapshot) {
   if (typeof elem == "undefined")
     elem = "body";
   this.elem = jQuery(elem);
@@ -35,12 +37,12 @@ function file_explorer(elem,snapshot) {
    */
 }
 
-file_explorer.prototype.loadSnapshot = function(snapshot){
+FileBrowser.prototype.loadSnapshot = function(snapshot){
   this.snapshot = snapshot;
   this.changeDirectory("/");
 };
 
-file_explorer.prototype.processCD = function (href) {
+FileBrowser.prototype.processCD = function (href) {
   var aref = href.split("/");
   if (pot.isDir.test(href)) {
     aref.pop();
@@ -56,7 +58,7 @@ file_explorer.prototype.processCD = function (href) {
     this.cd.append("/<a href='" + netref + "'>" + name + "</a>");
   }
 };
-file_explorer.prototype.changeDirectory = function (href) {
+FileBrowser.prototype.changeDirectory = function (href) {
   this.processCD(href);
   var list = pot.get(this.snapshot.filesystem,href);
   this.dirElem.empty();
@@ -77,7 +79,7 @@ file_explorer.prototype.changeDirectory = function (href) {
   });
 };
 
-file_explorer.prototype.viewFile = function(href){
+FileBrowser.prototype.viewFile = function(href){
   this.processCD(href);
   var file = pot.get(this.snapshot.filesystem,href);
   var code = this.fileElem.children("code");
@@ -99,3 +101,6 @@ file_explorer.prototype.viewFile = function(href){
 
 function addLoadingSpinner(){}
 function removeLoadingSpinner(){}
+
+
+module.exports = FileBrowser;

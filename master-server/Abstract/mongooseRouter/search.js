@@ -49,6 +49,7 @@ module.exports = function(req,res,next){
     },
     function(search,next){
       _.extend(search,req.query||{});
+      console.log(search);
       var q = req.mClass.find(search).sort(sort);
       if(ipp !== false){
         q = q.limit(ipp);

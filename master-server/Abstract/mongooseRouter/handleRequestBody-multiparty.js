@@ -2,96 +2,104 @@
 var multiparty = require("multiparty");
 var fs = require("fs");
 var mongoose = require("mongoose");
+var promiseQueue = require("../promise-queue.js");
+var mpath = require("mpath");
 
 var noEdit = /_$/;
 var isHidden = /^_/;
 
 
 module.exports = function(req,instance,next){
-  if(req.method.toUpperCase() === "GET") return next();
+  return req.on("data",function(data){
+    console.log(data.toString("UTF8"));
+  });
+
   var paths = instance.constructor.schema.paths;
   var virtuals = instance.constructor.schema.virtuals;
   var form = new multiparty.Form({maxFieldSize:8192, maxFields:10, autoFiles:false});
-  var ended = false;
-
-  function destroy(e){
-    if(ended) return;
-    ended = true;
+  promiseQueue(instance).then(function(){
+    console.log("then");
+    setImmediate(next);
+  }).catch(function(e){
     form.end();
     req.pause();
+    console.error("error: ",e);
     next(e);
-  }
+  });
 
+  instance.queueState.pending();
   form.on("part", function(part) {
-    if(isHidden.test(part.name)) return;
-    if(noEdit.test(part.name)) return;
+    console.log(part.name);
+    part
+      .on("error",instance.queueState.error);
+    return part.resume();
+
+    if(isHidden.test(part.name)) return part.resume();
+    if(noEdit.test(part.name)) return part.resume();
     if(part.name in virtuals){
-      part.resume();
       if (!part.filename) return;
-      instance[part.name] = part;
-      part.on("error",destroy);
-      return;
+      instance.queueState.pending();
+      mpath.set(part.name,part,instance);
+      part
+        .on("error",instance.queueState.error)
+        .on("end",instance.queueState.done);
+      return part.resume();
     }
-    if(!(part.name in paths)){
-      if(instance.setItem){
-        instance.setItem(part);
-        part.on("error",destroy);
-      }
-      return;
-    }
-    part.resume();
-    if (!part.filename) return;
+    if(!(part.name in paths)) return part.resume();
+    if (!part.filename) return part.resume();
     if(paths[part.name].instance.toLowerCase() === "objectid"){
       var Model = mongoose.model(paths[part.name].options.ref);
-      if(!Model) return destroy(new Error("Model does not exist"));
-      return handleObject(part,function(err,obj){
-        if(err) return destroy(err);
-        instance[part.name] = new Model(obj);
-      });
+      if(!Model) return instance.queueState.error(new Error("Model does not exist"));
+//      handleObject(Model,part,instance);
+      return part.resume();
     }
-    handleFile(part,{
-      _id: instance._id+"_"+part.name, // a MongoDb ObjectId
-      filename: part.filename, // a filename may want to change this to something different
-      content_type: part.headers["content-type"],
-      root: instance.constructor.modelName,
-    },function(e,value){
-      if(e) return destroy(e);
-      instance[part.name] = "gridfs://"+instance._id+"_"+part.name;
-    });
+    handleFile(part,instance);
+    part.resume();
   });
   form.on("field", function(name, value) {
     if(!(name in virtuals) && !(name in paths)) return;
     if(value === "" || value === null) return;
-    instance[name] = value;
+    mpath.set(name,value,instance);
   });
   form.on("close", function() {
+    instance.queueState.done();
     console.log("Done parsing form");
-    setImmediate(next);
   });
-  form.on("error",destroy);
+  form.on("error",instance.queueState.error);
   form.parse(req);
 };
 
 
-function handleFile(file, gridfsOb, next) {
-  file
-  .pipe(mongoose.gfs.createWriteStream(gridfsOb))
-  .on("close",function(){
-    console.log("finished file: ",gridfsOb._id,gridfsOb.filename);
-    next();
+function handleFile(part, instance) {
+  instance.queueState.pending();
+  part
+  .pipe(mongoose.gfs.createWriteStream({
+    _id: instance._id+"_"+part.name, // a MongoDb ObjectId
+    filename: part.filename, // a filename may want to change this to something different
+    content_type: part.headers["content-type"],
+    root: instance.constructor.modelName,
+  }))
+  .on("finish",function(){
+    console.log("finished file: ",instance._id+"_"+part.name,part.filename);
+    mpath.set(part.name,"gridfs://"+instance._id+"_"+part.name,instance);
+    instance.queueState.done();
   })
-  .on("error",next);
+  .on("error",instance.queueState.error);
 }
 
-function handleObject(file,next){
+function handleObject(Model,part,instance){
+  instance.queueState.pending();
+
+  //This is a bad function that has possible openings for an attack
   var buffer = "";
-  file.on("data",function(data){
+  part.on("data",function(data){
     buffer += data.toString("utf8");
   }).on("end",function(){
     try{
-      next(void(0),JSON.parse(buffer));
+      mpath.set(part.name,new Model(JSON.parse(buffer)),instance);
+      instance.queueState.done();
     }catch(e){
-      next(e);
+      instance.queueState.error(e);
     }
-  }).on("error",next);
+  }).on("error",instance.queueState.error);
 }

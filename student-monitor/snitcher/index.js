@@ -7,6 +7,7 @@ var cp = require("child_process");
 var pathutil = require("path");
 var gitEmit = require("git-emit");
 var EE = require("events").EventEmitter;
+var PT = require("stream").PassThrough;
 
 
 function Snitcher(path){
@@ -37,54 +38,62 @@ Snitcher.prototype.start = function(next){
 	});
 
 	this.git_ee.on("post-commit",function(){
-		var diff = cp.spawn("git",["diff", "HEAD^"],{cwd:self.path});
-		diff.on("error",console.error.bind(console));
+		var stdo = cp
+			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
+			.stdout.pipe(new PT());
+		stdo.pause();
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("commit",{
 				subject:self.subject,
 				message: cp.execSync("git log -1 --pretty=%B").toString("utf8"),
-				diff:diff,
+				diff:stdo,
 				test:test_res
 			});
 		});
 	});
 
 	this.fs_watch.on('add', function(path) {
-		var diff = cp.spawn("git",["diff", "HEAD", path],{cwd:self.path});
-		diff.on("error",console.error.bind(console));
+		var stdo = cp
+			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
+			.stdout.pipe(new PT());
+		stdo.pause();
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"add",
-				diff:diff,
+				diff:stdo,
 				path:path,
 				test:test_res
 			});
 		});
 	}).on('change', function(path) {
-		var diff = cp.spawn("git",["diff", "HEAD", path],{cwd:self.path});
-		diff.on("error",console.error.bind(console));
+		var stdo = cp
+			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
+			.stdout.pipe(new PT());
+		stdo.pause();
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"save",
-				diff:diff,
+				diff:stdo,
 				path:path,
 				test:test_res
 			});
 		});
 	}).on('unlink', function(path) {
-		var diff = cp.spawn("git",["diff", "HEAD", path],{cwd:self.path});
-		diff.on("error",console.error.bind(console));
+		var stdo = cp
+			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
+			.stdout.pipe(new PT());
+		stdo.pause();
 		testRunner(self.path,function(err,test_res){
 			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"rem",
-				diff:diff,
+				diff:stdo,
 				path:path,
 				test:test_res
 			});

@@ -1,6 +1,7 @@
 var sa = require("superagent");
 var cp = require("child_process");
 var async = require("async");
+var PT = require("stream").PassThrough;
 
 async.filter(["generic","busboy","formidable","multiparty"],function(name,next){
   var diff = cp.spawn("git",["diff", "HEAD", "HEAD^"],{

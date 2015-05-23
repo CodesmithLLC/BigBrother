@@ -19,13 +19,13 @@ module.exports = function(io){
         return noHelp(help);
       }
       TA.markIgnore(level,help,function(e){
+        if(e) console.error(e);
         return escalate(level === "global"?"admin":"global",help);
       });
     },5*60*1000);
-    level = level==="local"?help.classroom:level;
     HelpRequest.update({_id:help._id},{escalation:level},function(e){
       if(e) console.error(e);
-      io.to(level+"/help-request").emit("request",help);
+      io.to((level==="local"?help.classroom:level)+"-requests").emit("request",help);
     });
   }
 
@@ -58,7 +58,7 @@ module.exports = function(io){
         HelpRequest.findByIdAndUpdate(help_id,{$push:{ta:ta._id}, state:"taken"},function(e,help){
           if(e) console.error(e);
           ws.broadcast
-            .to(help.escalation==="local"?help.classroom:help.escalation)
+            .to(help.escalation==="local"?help.classroom:help.escalation+"-requests")
             .emit("help-taken",help._id);
           ws.broadcast.to(help.student).emit("help-taken",help._id);
           ws.emit("go-help",help._id);

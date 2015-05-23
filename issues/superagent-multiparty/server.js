@@ -57,7 +57,7 @@ app.listen(8000,function(){
   });
 });
 
-function isValid(part){
+function isValid(part,partname,filename){
   var ready = false;
   var buff = "";
   part.on("data",function(data){
@@ -70,11 +70,20 @@ function isValid(part){
     }
   });
   part.on("end",function(){
-    if(buff.indexOf(diff) > -1){
+    var i = buff.indexOf(diff);
+    if(i > -1){
       if(buff === diff){
-        console.log("perfect diff");
-      }else console.log("has diff");
-    }else console.error("bad diff");
+        console.log(partname,"[",filename,"]", ": perfect diff");
+      }else{
+        var c = 0;
+        while(i > -1){
+          buff = buff.substring(i+diff.length);
+          c++;
+          i = buff.indexOf(diff);
+        }
+        console.log(partname,"[",filename,"]", ": has "+c+" diff(s)");
+      }
+    }else console.error(partname,"[",filename,"]", ": bad diff");
   });
   return true;
 }
