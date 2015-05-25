@@ -15,33 +15,30 @@ However, I'll try to walk you through this the best I can
 
 var P = require("bluebird");
 
-module.exports = function(obj){
+module.exports = function(obj,next){
   var tasks = 0;
   var rejected = false;
   var resolved = false;
-  return new P(function(rej,ful){
-    obj.queueState = {
-      pending:function(){
-        tasks++;
-      },
-      error:function(e){
-        console.error(arguments);
-        if(resolved) return console.error("already resolved");
-        if(rejected) return console.error("rejecting twice");
-        rejected = true;
-        rej(e);
-      },
-      done: function(){
-        if(rejected) return console.log("already rejected");
-        if(resolved) return console.error("resolve twice");
-        tasks--;
-        console.log(tasks);
-        if(tasks === 0){
-          resolved = true;
-          delete obj.queueState;
-          ful();
-        }
+  obj.queueState = {
+    pending:function(){
+      tasks++;
+    },
+    error:function(e){
+      if(resolved) return console.error("already resolved");
+      if(rejected) return console.error("rejecting twice");
+      rejected = true;
+      next(e);
+    },
+    done: function(){
+      if(rejected) return console.log("already rejected");
+      if(resolved) return console.error("resolve twice");
+      tasks--;
+      console.log(tasks);
+      if(tasks === 0){
+        resolved = true;
+        delete obj.queueState;
+        next();
       }
-    };
-  });
+    }
+  };
 };

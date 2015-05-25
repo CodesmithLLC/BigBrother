@@ -24,16 +24,13 @@ schema.virtual('raw').set(function (stream) {
   var self = this;
   //the stream tends to not be capabale of piping to two sources...
   //hopefully will reduce backpressure
-  /*
   this.queueState.pending();
   stream.pipe(new pt()).pipe(new parseDiff()).on("full",function(full){
     self.raw_ = "gridfs://"+self._id+"_raw_";
     self.diffObj = full;
   })
-  .on("finish",this.queueState.done)
-  .on("error",this.queueState.error);
-  */
-  /*
+    .on("finish",this.queueState.done)
+    .on("error",this.queueState.error);
   this.queueState.pending();
   stream.pipe(new pt()).pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_raw_", // a MongoDb ObjectId
@@ -43,7 +40,6 @@ schema.virtual('raw').set(function (stream) {
   }))
     .on("finish",this.queueState.done)
     .on("error",this.queueState.error);
-    */
 });
 
 schema.statics.Permission = function(req,next){

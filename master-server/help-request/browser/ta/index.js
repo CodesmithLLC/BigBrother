@@ -23,9 +23,10 @@ function HelpList(){
     self.requests[help_id].elem.remove();
     delete self.requests[help_id];
   });
-  sa.get("/HelpRequest?populate=student").end(function(err,res){
+  sa.get("/HelpRequest?populate=student&sort=-createdOn").end(function(err,res){
     if(err) throw err;
     console.log(res);
+    self.elem.find(".file-browser").append(self.browser.elem);
     res.body.forEach(self.addHelp.bind(self));
   });
 }
@@ -39,7 +40,7 @@ HelpList.prototype.addHelp = function(help){
   var self = this;
   help.elem.on("click",function(e){
     e.preventDefault();
-    if(!(help._id in this.requests)) throw new Error("non existant help request");
+    if(!(help._id in self.requests)) throw new Error("non existant help request");
     if(self.currentRequest === help) return;
     self.currentRequest = help;
     self.browser.loadSnapshot(help.snapshot);

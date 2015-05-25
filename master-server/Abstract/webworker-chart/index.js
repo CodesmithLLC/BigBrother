@@ -28,10 +28,10 @@ function Chart(elem,x_key,y_key,axis){
       contents: void 0
     }
   });
-  this.curRange = this.chart.zoom();
   this.x_key = x_key;
   this.y_key = y_key;
   this.workers = [];
+  this.curRange = this.chart.zoom();
 }
 
 Chart.prototype.remove = function(url_or_name){

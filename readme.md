@@ -54,6 +54,7 @@ of the master-server
 * During Server Starts, we want to ensure all ta's are considered not online
   -When moving to production, we want to ensure this happens whenever the ws server starts
   -Current place is in master-server/debug.js
+* Need to add any "waiting" help requests to the escalation queue if the server restarts
 * Need to ensure that we know the semester so we can limit our searches each time
 
 

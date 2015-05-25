@@ -65,24 +65,22 @@ schema.virtual('raw').set(function (stream) {
   var system = {};
   var files = [];
   var self = this;
-  instance.queueState.pending();
+  this.queueState.pending();
   stream.pipe(mongoose.gfs.createWriteStream({
     _id: this._id+"_snapshot.raw", // a MongoDb ObjectId
     filename: stream.filename, // a filename may want to change this to something different
     content_type: stream.headers["content-type"],
     root: this.constructor.modelName,
   }))
-    .on("error",instance.queueState.error)
-    .on("finish",instance.queueState.done);
-  instance.queueState.pending();
+    .on("error",this.queueState.error)
+    .on("finish",this.queueState.done);
+  this.queueState.pending();
   stream.pipe(tar.extract())
   //We want the error to be thrown
   .on('entry', function(header, stream, callback) {
     if(header.type === "directory"){
-      console.log(header.name);
       return callback(); //We don't care about dirs
     }
-    console.log(header);
     var bn = pu.basename(header.name);
     var metaData = {
       path:header.name,
@@ -101,7 +99,7 @@ schema.virtual('raw').set(function (stream) {
       filename: bn,
       content_type: metaData.mimeType,
       root: self.constructor.modelName,
-      metaData:metaData
+      metaData: metaData
     })).on("finish",callback);
     i++;
   }).on("finish",function(){
@@ -110,8 +108,8 @@ schema.virtual('raw').set(function (stream) {
       filesystem: system,
       files: files
     };
-    instance.queueState.done();
-  }).on("error",instance.queueState.error);
+    self.queueState.done();
+  }).on("error",this.queueState.error);
 });
 
 var HelpRequest = mongoose.model('HelpRequest', schema);

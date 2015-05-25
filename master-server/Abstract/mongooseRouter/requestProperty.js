@@ -5,7 +5,7 @@ var mpath = require("mpath");
 module.exports = function(req,res,next){
   var paths = req.paths;
   var val = mpath.get(req.params.property,req.doc);
-  var key = paths[req.params.property];
+  var key = paths[req.mProp];
   if(key.instance === "objectid"){
     if(typeof val === "undefined"){
       return res.status(404).end();
@@ -31,19 +31,24 @@ module.exports = function(req,res,next){
       });
     });
   }
-  if(path.instance !== "string"){
+  if(key.instance === "Array"){
+    if(key.caster.instance !== "String") return res.status(200).send(val);
+  }else if(key.instance !== "String"){
+    console.log("not a string",key);
     return res.status(200).send(val);
   }
-  if(!/^gridfs::\/\//.test(val)){
+  if(!/^gridfs:\/\//.test(val)){
+    console.log("not gridfs");
     return res.status(200).send(val);
   }
   var prop = {
     _id: val.substring(9),
-    root: instance.constructor.modelName
+    root: req.mClass.modelName
   };
   mongoose.gfs.findOne(prop, function (err, file) {
     if(err) return next(err);
     if(!file) return res.status(404).end();
+    console.log("found",file);
     res.status(200).set("Content-Type",file.content_type);
     mongoose.gfs.createReadStream(prop).on("error",next).pipe(res);
   });

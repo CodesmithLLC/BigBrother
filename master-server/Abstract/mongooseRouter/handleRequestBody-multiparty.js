@@ -10,51 +10,43 @@ var isHidden = /^_/;
 
 
 module.exports = function(req,instance,next){
-  return req.on("data",function(data){
-    console.log(data.toString("UTF8"));
-  });
-
   var paths = instance.constructor.schema.paths;
   var virtuals = instance.constructor.schema.virtuals;
   var form = new multiparty.Form({maxFieldSize:8192, maxFields:10, autoFiles:false});
-  promiseQueue(instance).then(function(){
-    console.log("then");
+  promiseQueue(instance,function(e){
+    console.log(instance);
+    if(e){
+      form.end();
+      req.pause();
+      console.error("error: ",e);
+      return setImmediate(next.bind(next,e));
+    }
     setImmediate(next);
-  }).catch(function(e){
-    form.end();
-    req.pause();
-    console.error("error: ",e);
-    next(e);
   });
 
   instance.queueState.pending();
   form.on("part", function(part) {
     console.log(part.name);
-    part
-      .on("error",instance.queueState.error);
-    return part.resume();
-
     if(isHidden.test(part.name)) return part.resume();
     if(noEdit.test(part.name)) return part.resume();
     if(part.name in virtuals){
-      if (!part.filename) return;
+      if (!part.filename) return part.resume();
       instance.queueState.pending();
       mpath.set(part.name,part,instance);
       part
         .on("error",instance.queueState.error)
         .on("end",instance.queueState.done);
-      return part.resume();
+      return;
     }
     if(!(part.name in paths)) return part.resume();
     if (!part.filename) return part.resume();
     if(paths[part.name].instance.toLowerCase() === "objectid"){
       var Model = mongoose.model(paths[part.name].options.ref);
       if(!Model) return instance.queueState.error(new Error("Model does not exist"));
-//      handleObject(Model,part,instance);
-      return part.resume();
+      handleObject(Model,part,instance);
+      return;
     }
     handleFile(part,instance);
-    part.resume();
   });
   form.on("field", function(name, value) {
     if(!(name in virtuals) && !(name in paths)) return;
@@ -102,4 +94,5 @@ function handleObject(Model,part,instance){
       instance.queueState.error(e);
     }
   }).on("error",instance.queueState.error);
+  part.resume();
 }

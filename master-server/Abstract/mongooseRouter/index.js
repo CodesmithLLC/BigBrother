@@ -18,13 +18,24 @@ router.param('classname', function(req, res, next, classname){
 
 router.param("property", function(req,res,next,property){
   if(isHidden.test(property)) return res.status(404).end();
-  if(property in req.mClass.schema.paths){
-    req.paths = req.mClass.schema.paths;
-    return next();
-  }
-  if(property in req.mClass.schema.virtuals){
-    req.paths = req.mClass.schema.virtuals;
-    return next();
+  var pparts = property.split(".");
+  var l = pparts.length;
+  var i = 1;
+  var tprop = pparts[0];
+  while(i<l){
+    if(tprop in req.mClass.schema.paths){
+      req.paths = req.mClass.schema.paths;
+      req.mProp = tprop;
+      console.log("is a property");
+      return next();
+    }
+    if(tprop in req.mClass.schema.virtuals){
+      req.paths = req.mClass.schema.virtuals;
+      req.mProp = tprop;
+      console.log("is a virtual");
+      return next();
+    }
+    tprop += "."+pparts[i];
   }
   //We may be searching with this model
   var maybe;
@@ -98,13 +109,11 @@ router.post("/:classname",createOne=function(req,res,next){
       console.log("doc: ",doc);
       bodyHandler(req,doc,function(e){
         if(e) return next(e);
-        console.log("next??");
         doc.save(next);
       });
     }
   ],function(err){
     if(err) return next(err);
-    console.log("next?");
     res.status(200).send(doc.toObject());
   });
 });

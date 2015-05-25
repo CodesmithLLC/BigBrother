@@ -36,6 +36,9 @@ function Student(student){
     );
     self.chart.addURL("/Student/"+self._id+"/FSDiff","File Change");
     self.chart.addURL("/Student/"+self._id+"/Commit","Commit");
+    requestAnimationFrame(function(){
+      self.chart.chart.zoom([min,d]);
+    })
   });
 }
 
