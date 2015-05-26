@@ -8,47 +8,53 @@ module.exports = function(io){
   var hr_id2to = {};
 
   HelpRequest.schema.post("save",function(help){
-    if(help.state === "waiting"){
-      return escalate(help.escalation,help);
-    }
+    if(help.state === "waiting") return miniEscalate(help.escalation,help);
   });
+
+  function miniEscalate(level,help){
+    io.to("global-requests").emit("request",help);
+    hr_id2to[help._id] = setTimeout(noHelp.bind(noHelp,help), 5*60*1000);
+  }
 
   function escalate(level,help){
     hr_id2to[help._id] = setTimeout(function(){
       if(level === "admin"){
         return noHelp(help);
       }
-      TA.markIgnore(level,help,function(e){
+      HelpRequest.update({_id:help._id},{escalation:level},function(e){
         if(e) console.error(e);
-        return escalate(level === "global"?"admin":"global",help);
+        TA.markIgnore(level,help,function(e){
+          if(e) console.error(e);
+          return escalate(level === "global"?"admin":"global",help);
+        });
       });
     },5*60*1000);
-    HelpRequest.update({_id:help._id},{escalation:level},function(e){
-      if(e) console.error(e);
-      io.to((level==="local"?help.classroom:level)+"-requests").emit("request",help);
-    });
+    console.log("escalating", level,", event: ", (level==="local"?help.classroom:level)+"-requests", help);
+    io.to((level==="local"?help.classroom:level)+"-requests").emit("request",help);
   }
 
   function noHelp(help){
+    console.log("no help1");
     HelpRequest.update({_id:help._id},{state:"timeout"},function(e){
       if(e) console.error(e);
-      console.log("no help");
+      console.log("no help2");
     });
   }
 
   return function(ws){
-    var user = ws.request.user;
-    var cl, gl, fl;
     async.waterfall([
-      TA.find.bind(TA,{user:user}),
+      TA.find.bind(TA,{user:ws.request.user}),
       function(ta,next){
         if(arguments.length === 1) return next("didn't find ta");
-        ws.join(ta.classroom+"-requests");
         ws.join("global-requests");
-        next(void 0, ws);
+//        ws.join(ta.classroom+"-requests");
+        next();
       },
     ],function(e){
-      if(e) return ws.disconnect();
+      if(e){
+        console.error("Cannot Join Rooms",e);
+        return ws.disconnect();
+      }
       ws.on("help-take",function(help_id){
         if(!(help_id in hr_id2to)){
           return ws.emit("help-taken",help_id);

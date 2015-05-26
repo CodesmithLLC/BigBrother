@@ -58,6 +58,13 @@ of the master-server
 * Need to ensure that we know the semester so we can limit our searches each time
 
 
+# Known Necessities
+* Seperate Students and TAs By classroom
+  * Send Help requests locally first, then globally
+* Seperate All users by "semester" (I forget the vocabulary)
+  * Otherwise, may include students/Tas that have been fired or more
+* Access the users that have paid
+
 # Long Term Enhancements
 * For student-monitor
   * Display Passes and Failures in graph

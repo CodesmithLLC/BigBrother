@@ -18,7 +18,7 @@ function HelpList(){
   this.list = this.elem.find(".help-list");
   this.currentRequest = void 0;
   this.io = io(window.location.origin+"/help-request");
-  this.io.on("help-request",self.addHelp.bind(self));
+  this.io.on("request",self.addHelp.bind(self));
   this.io.on("help-taken",function(help_id){
     self.requests[help_id].elem.remove();
     delete self.requests[help_id];
@@ -32,6 +32,7 @@ function HelpList(){
 }
 
 HelpList.prototype.addHelp = function(help){
+  console.log("adding help");
   if(help._id in this.requests){
     return this.requests[help._id].update(help);
   }
