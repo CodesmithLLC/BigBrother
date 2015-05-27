@@ -64,6 +64,8 @@ of the master-server
 * Seperate All users by "semester" (I forget the vocabulary)
   * Otherwise, may include students/Tas that have been fired or more
 * Access the users that have paid
+* Connecting P2P during help request
+
 
 # Long Term Enhancements
 * For student-monitor

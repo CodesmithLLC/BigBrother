@@ -39,7 +39,7 @@ Snitcher.prototype.start = function(next){
 
 	this.git_ee.on("post-commit",function(){
 		var stdo = cp
-			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
+			.spawn("git",["diff", "HEAD^", "HEAD"],{cwd:self.path})
 			.stdout.pipe(new PT());
 		stdo.pause();
 		testRunner(self.path,function(err,test_res){
