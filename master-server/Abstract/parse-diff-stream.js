@@ -4,10 +4,10 @@ var schema = [
   [/^diff\s/, createFile],
   [/^new file mode \d+$/, isNew],
   [/^index\s[\da-zA-Z]+\.\.[\da-zA-Z]+(\s(\d+))?$/, setIndex],
-  [/^---\s/, fromFile],
+  [/^\-\-\-\s/, fromFile],
   [/^\+\+\+\s/, toFile],
-  [/^@@\s+\-(\d+),(\d+)\s+\+(\d+),(\d+)\s@@/, chunkOverview],
-  [/^-/, del],
+  [/^@@\s+\-(\d+),(\d+)\s+\+(\d+),(\d+)\s+@@/, chunkOverview],
+  [/^\-/, del],
   [/^\+/, add]
 ];
 
@@ -24,14 +24,12 @@ function ParseDiffStream(){
   };
   var self = this;
   this.on('part',function(part){
-    console.log("part");
     part.total = part.additions + part.deletions;
     self.curFile.additions += part.additions;
     self.curFile.deletions += part.deletions;
     self.curFile.parts.push(part);
   });
   this.on('file',function(file){
-    console.log("file");
     if(self.curChunk){
       self.emit('part',self.curChunk);
     }
@@ -41,7 +39,6 @@ function ParseDiffStream(){
     self.stats.files.push(file);
   });
   this.on('finish', function() {
-    console.log("finish");
     if(self.curFile){
       self.emit('file',self.curFile);
     }
@@ -54,15 +51,16 @@ ParseDiffStream.prototype = Object.create(Writable.prototype);
 ParseDiffStream.prototype.constructor = ParseDiffStream;
 
 var nl = "\n".charCodeAt(0);
+var cr = "\r".charCodeAt(0);
 
 ParseDiffStream.prototype._write = function(chunk,encoding,next){
-  console.log("writing",chunk.length);
+  console.log("writing",chunk.toString("utf8"));
   var lastIndex = 0, curstr;
   for(var i=0,l=chunk.length;i<l;i++){
     lastIndex = i;
-    while(chunk[i] !== nl && i<l) i++;
+    while((chunk[i] !== nl && chunk[i] !== cr) && i<l) i++;
     if(i === l) break;
-    curstr = this.buffer + chunk.slice(lastIndex,i-1,"utf8");
+    curstr = this.buffer + chunk.slice(lastIndex,i,"utf8");
     this.buffer = "";
     for (_i = 0; _i < sl; _i++) {
       p = schema[_i];
