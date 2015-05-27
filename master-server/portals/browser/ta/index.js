@@ -1,33 +1,15 @@
-var Student = require("../../../student-monitor/browser/ta/Student");
+var StudentList = require("../../../student-monitor/browser/ta");
 var HelpRequest = require("../../../help-request/browser/ta");
 var jQuery = require("jquery");
-var sa = require("superagent");
-var io = require("socket.io-client");
 window.addEventListener("load",function(){
+  var sl = new StudentList();
   var hr = new HelpRequest();
-  var students = [];
-  jQuery("#requests").append(hr.elem);
-
-  var stats = jQuery("#statistics");
-  sa
-  .get("/Student")
-  .end(function(err,res){
-    if(err) throw err;
-    var studentrefs = {};
-    res.body.forEach(function(student){
-      student = new Student(student);
-      stats.append(student.elem);
-      studentrefs[student._id] = student;
-    });
-    var live = io(window.location.origin+"/student-monitor");
-    live.on("fsdiff",function(diff){
-      console.log("fsdiff",diff);
-      studentrefs[diff.student._id||diff.student].chart.insert("File Change",diff);
-    });
-    live.on("commit",function(diff){
-      console.log("commit");
-      studentrefs[diff.student._id||diff.student].chart.insert("Commit",diff);
-    });
+  jQuery("body>header>.menu a").on("click",function(e){
+    e.preventDefault();
+    var el = jQuery("#"+jQuery(this).attr("href").substring(1));
+    el.siblings().removeClass("shown");
+    el.addClass("shown");
   });
-
+  jQuery("#help-requests").append(hr.elem);
+  jQuery("#student-monitor").append(sl.elem);
 });

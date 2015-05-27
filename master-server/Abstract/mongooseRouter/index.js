@@ -104,9 +104,7 @@ router.post("/:classname",createOne=function(req,res,next){
       }
     },
     function(create,next){
-      console.log("doc: ",create);
       doc = new req.mClass(create);
-      console.log("doc: ",doc);
       bodyHandler(req,doc,function(e){
         if(e) return next(e);
         doc.save(next);

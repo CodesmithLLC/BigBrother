@@ -14,7 +14,6 @@ module.exports = function(req,instance,next){
   var virtuals = instance.constructor.schema.virtuals;
   var form = new multiparty.Form({maxFieldSize:8192, maxFields:10, autoFiles:false});
   promiseQueue(instance,function(e){
-    console.log(instance);
     if(e){
       form.end();
       req.pause();

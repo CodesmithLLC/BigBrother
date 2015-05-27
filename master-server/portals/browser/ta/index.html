@@ -3,21 +3,26 @@
 <head>
   <script src="/index.js"></script>
   <style>
-    header ul > li{
+    header ul.menu > li, body > ul{
       list-style-type:none;
       display: inline-block;
     }
+    .hidden{display:none}
+    .hidden-children>*{display:none}
+    .shown{display:block}
   </style>
 </head>
 <body>
   <header>
     <h1>Welcome to the TA Portal</h1>
-    <ul>
-      <li><a href="/help-requests"></a></li>
-      <li><a href="/student-monitor"></a></li>
+    <ul class="menu">
+      <li><a href="#help-requests">Help Requests</a></li>
+      <li><a href="#student-monitor">Student Monitor</a></li>
     </ul>
   </header>
-  <section id="statistics"></section>
-  <section id="requests"></section>
+  <ul class="pages hidden-children">
+    <li id="student-monitor"></li>
+    <li id="help-requests"></li>
+  </ul>
 </body>
 </html>

@@ -30,6 +30,7 @@
     "highland": "^2.5.0",
     "highlight": "^0.2.3",
     "highlight.js": "^8.6.0",
+    "jquery": "^2.1.4",
     "lodash": "^3.7.0",
     "memory-streams": "^0.1.0",
     "mime-types": "^2.0.11",
