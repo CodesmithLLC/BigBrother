@@ -1,0 +1,5 @@
+Single Server
+-All other servers open up a tcp connection to it over net protocol
+
+-Whenever a global event occurs, send it over tcp
+--The Server then broadcasts the event to all other servers

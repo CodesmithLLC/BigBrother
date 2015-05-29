@@ -1,6 +1,6 @@
 //https://github.com/substack/node-git-emit/issues/2
 var fs = require("fs");
-var testRunner = require("./testrunner");
+//var testRunner = require("./testrunner");
 var simpleGit = require("simple-git");
 var chokidar = require("chokidar");
 var cp = require("child_process");
@@ -42,15 +42,15 @@ Snitcher.prototype.start = function(next){
 			.spawn("git",["diff", "HEAD^", "HEAD"],{cwd:self.path})
 			.stdout.pipe(new PT());
 		stdo.pause();
-		testRunner(self.path,function(err,test_res){
-			if(err) self.emit("error",err);
+//		testRunner(self.path,function(err,test_res){
+//			if(err) self.emit("error",err);
 			self.emit("commit",{
 				subject:self.subject,
 				message: cp.execSync("git log -1 --pretty=%B").toString("utf8"),
 				diff:stdo,
-				test:test_res
+//				test:test_res
 			});
-		});
+//		});
 	});
 
 	this.fs_watch.on('add', function(path) {
@@ -58,46 +58,46 @@ Snitcher.prototype.start = function(next){
 			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
 			.stdout.pipe(new PT());
 		stdo.pause();
-		testRunner(self.path,function(err,test_res){
-			if(err) self.emit("error",err);
+//		testRunner(self.path,function(err,test_res){
+//			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"add",
 				diff:stdo,
 				path:path,
-				test:test_res
+//				test:test_res
 			});
-		});
+//		});
 	}).on('change', function(path) {
 		var stdo = cp
 			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
 			.stdout.pipe(new PT());
 		stdo.pause();
-		testRunner(self.path,function(err,test_res){
-			if(err) self.emit("error",err);
+//		testRunner(self.path,function(err,test_res){
+//			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"save",
 				diff:stdo,
 				path:path,
-				test:test_res
+//				test:test_res
 			});
-		});
+//		});
 	}).on('unlink', function(path) {
 		var stdo = cp
 			.spawn("git",["diff", "HEAD", path],{cwd:self.path})
 			.stdout.pipe(new PT());
 		stdo.pause();
-		testRunner(self.path,function(err,test_res){
-			if(err) self.emit("error",err);
+//		testRunner(self.path,function(err,test_res){
+//			if(err) self.emit("error",err);
 			self.emit("fsdiff",{
 				subject:self.subject,
 				type:"rem",
 				diff:stdo,
 				path:path,
-				test:test_res
+//				test:test_res
 			});
-		});
+//		});
 	});
 	setImmediate(next);
 };

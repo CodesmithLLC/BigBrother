@@ -44,7 +44,7 @@ module.exports.sendCommit = function(commit){
     .set("Transfer-Encoding","chunked")
     .field("subject",commit.subject)
     .field("commitMessage",commit.message)
-    .attach("test",commit.test.stdout,"test.txt")
+//    .attach("test",commit.test.stdout,"test.txt")
     .attach("raw",commit.diff,"diff.txt");
   req.end(function(err,res){
     if(err) throw err;
@@ -59,7 +59,7 @@ module.exports.sendFSDiff = function(fsdiff){
     .field("subject",fsdiff.subject)
     .field("path",fsdiff.path)
     .field("fs_type",fsdiff.type)
-    .attach("test",fsdiff.test.stdout,"test.txt")
+//    .attach("test",fsdiff.test.stdout,"test.txt")
     .attach("raw",fsdiff.diff,"diff.txt");
   req.end(function(err,res){
     if(err) throw err;

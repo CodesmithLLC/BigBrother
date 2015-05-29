@@ -90,6 +90,7 @@ function handleObject(Model,part,instance){
       mpath.set(part.name,new Model(JSON.parse(buffer)),instance);
       instance.queueState.done();
     }catch(e){
+      console.error("error: ",buffer);
       instance.queueState.error(e);
     }
   }).on("error",instance.queueState.error);

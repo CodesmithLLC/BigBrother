@@ -24,8 +24,11 @@ module.exports = function(path,next){
 		}else{
 			test = cp.spawn(mDir,["--reporter","json"],{cwd:path,env:process.env});
 		}
-		test.on("error",function(){
+		test.stdout.pipe(process.stdout);
+		test.stderr.pipe(process.stdout);
+		test.on("error",function(e){
 			console.log("ignoring test errors");
+			console.error(e);
 		});
 		next(void(0),test);
 	});

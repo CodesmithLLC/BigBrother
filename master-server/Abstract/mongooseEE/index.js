@@ -1,3 +1,4 @@
+var cluster = require('cluster');
 var ee = require("events").EventEmitter;
 
 module.exports = function(mongoose){

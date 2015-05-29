@@ -5,6 +5,10 @@ var fs = require('fs'),
 	spawn = require('child_process').spawn,
 	pidStore = __dirname+"/pid";
 
+if(!fs.existsSync("./debug")){
+	fs.mkdirSync("./debug");
+}
+
 program
 .command('stop')
 .action(function () {
