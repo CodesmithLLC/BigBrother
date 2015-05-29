@@ -1,6 +1,9 @@
 var sa = require("superagent");
 var sio = require("socket.io-client");
 var jQuery = require("jquery");
+var fs = require("fs");
+var template = fs.readFileSync(__dirname+"/template.html","utf8");
+var currentHelp = fs.readFileSync(__dirname+"/current-help.html","utf8");
 
 var HELP_STATES = [
   "none",
@@ -9,14 +12,20 @@ var HELP_STATES = [
   "feedback"
 ];
 
-function HelpButton(form){
+function HelpButton(){
   var state = "none";
   var io = sio(window.location.origin+"/help-request");
-  form = jQuery(form);
+  this.elem = jQuery("<div></div>");
+  var cancel = jQuery("<button>Cancel</button>");
+  var form = jQuery(template);
+  var curr = jQuery(currentHelp);
+  this.elem.append(form);
+  this.elem.append(curr);
+  this.elem.append(cancel);
   form.on("submit",function(e){
     e.preventDefault();
     if(state !== "none"){
-      return flash("We currently Your Help request has been submitted");
+      return flash("Your help request has already been submitted");
     }
     console.log(this);
     sa.post(
@@ -28,10 +37,35 @@ function HelpButton(form){
       flash("Your Help request has been submitted");
     });
   });
-  io.on("help-state",function(new_state){
-    state = new_state;
+  curr.on("submit",function(e){
+    e.preventDefault();
+    if(state === "none"){
+      return flash("You're not currently requesting help");
+    }
+    var boo = jQuery(this).find("[name=succeeded]").val();
+    if(boo == "1"){
+      io.emit("help-solve");
+    }else{
+      io.emit("help-fail");
+    }
   });
-  io.on("help-coming",function(helper){
+  io.on("help-aware",function(){
+    state = "requesting";
+    console.log("awa");
+    cancel.siblings().addClass("hidden");
+    cancel.removeClass("hidden");
+  });
+  io.on("help-finish",function(){
+    state = "none";
+    form.siblings().addClass("hidden");
+    form.removeClass("hidden");
+  });
+  io.on("help-here",function(){
+    console.log("tak");
+    curr.siblings().addClass("hidden");
+    curr.removeClass("hidden");
+  });
+  io.on("help-here",function(helper){
     if(state === "none"){
       flash(
         "A TA is coming to you",

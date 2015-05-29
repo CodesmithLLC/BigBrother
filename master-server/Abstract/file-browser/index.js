@@ -39,6 +39,7 @@ function FileBrowser(snapshot) {
 }
 
 FileBrowser.prototype.loadSnapshot = function(snapshot){
+  console.log(snapshot);
   this.snapshot = snapshot;
   this.changeDirectory("/");
 };
@@ -56,19 +57,19 @@ FileBrowser.prototype.processCD = function (href) {
       name = "root";
     } else
       netref += "/" + name;
-    this.cd.append("/<a href='" + netref + "'>" + name + "</a>");
+    this.cd.append("/<a href='" + netref + "'>" + name.replace(/%2E/,".") + "</a>");
   }
 };
 FileBrowser.prototype.changeDirectory = function (href) {
   this.processCD(href);
   var list = pot.get(this.snapshot.filesystem,href);
   this.dirElem.empty();
+  this.fileElem.children("code").empty();
   href = href === "/"?href:href+"/";
   var self = this;
   this.dirElem.removeClass("hidden");
   this.fileElem.addClass("hidden");
   Object.keys(list).forEach(function(name){
-    console.log(name);
     var item = list[name];
     var el = jQuery("<li><a href='" + href+name + "'>" + name.replace(/%2E/,".") + "</a></li>");
     if (item._id) {
@@ -92,13 +93,12 @@ FileBrowser.prototype.viewFile = function(href){
   var self = this;
   //would like to stream to the dom here, but that makes little sense
   //I still need to format to
-  console.log(file);
   sa.get(window.location.origin+"/"+file.parent+"/"+file._id.split("_")[1])
   .end(function(err,res){
     if(err) throw err;
     removeLoadingSpinner(self.fileElem);
-    console.log(res);
     code.text(res.text);
+    code.attr("class",file.mimeType.replace(/.*\/(x\-)?/,""));
     hljs.highlightBlock(code[0]);
   });
 };

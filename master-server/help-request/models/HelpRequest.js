@@ -3,11 +3,13 @@ var tar = require("tar-stream");
 var mimetypes = require("mime-types");
 var pu = require("path");
 var pot = require("../../Abstract/path-object-traversal");
+var Interaction = require("./Interaction");
+var async = require("async");
+var TA = require("../../portals/models/ta");
 
 var schema = new mongoose.Schema({
-  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student"},
-  ta: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
-  ignoredBy: [{type: mongoose.Schema.Types.ObjectId, ref:"TA"}],
+  student: {type: mongoose.Schema.Types.ObjectId, ref:"Student", index:true},
+  ta: {type: mongoose.Schema.Types.ObjectId, ref:"TeachersAssistant", index:true},
   classroom:{type:String,required:true,index:true},
   createdAt: {
     type:Number,
@@ -25,6 +27,160 @@ var schema = new mongoose.Schema({
   escalation:{type:String, default:"local"},
   snapshot: require("./SnapShot")
 });
+
+schema.statics.findTAsCurrent = function(ta,next){
+  this.findOne({ta:ta._id,state:"taken"}).populate("student").exec(next);
+};
+
+schema.statics.take = function(help_id,ta,next){
+  this.findById(help_id,function(e,hr){
+    if(e) return next(e);
+    if(!hr) return next(new Error("Help Request doesn't exist"));
+    hr.take(ta,next);
+  });
+};
+schema.statics.ignore = function(help_id,level,next){
+  this.findById(help_id,function(e,hr){
+    if(e) return next(e);
+    if(!hr) return next(new Error("Help Request doesn't exist"));
+    hr.ignore(level,next);
+  });
+};
+
+schema.statics.fail = function(student,next){
+  this.findOne({student:student._id,state:"taken"},function(e,hr){
+    if(e) return next(e);
+    if(!hr) return next(new Error("Help Request doesn't exist"));
+    hr.fail(next);
+  });
+};
+
+schema.statics.solve = function(student,next){
+  this.findOne({student:student._id,state:"taken"},function(e,hr){
+    if(e) return next(e);
+    if(!hr) return next(new Error("Help Request doesn't exist"));
+    hr.solve(next);
+  });
+};
+
+schema.statics.cancel = function(student,next){
+  this.findOne({student:student._id,state:"waiting"},function(e,hr){
+    if(e) return next(e);
+    if(!hr) return next(new Error("Help Request doesn't exist"));
+    hr.cancel(next);
+  });
+};
+
+schema.methods.ignore = function(level,next){
+  var HR = this.constructor;
+  var self = this;
+  async.map([function(next){
+    Interaction.find({helpRequest:this._id}).select("ta").exec(function(e,list){
+      if(e) return next(e);
+      list = list.map(function(item){
+        return item.ta;
+      });
+      next(void 0, list);
+    });
+  }, function(next){
+    var tofind = {state:"taken"};
+    if(level === "local"){
+      tofind.classroom = self.classroom;
+    }
+    HR.find(tofind).select("ta").exec(function(e,list){
+      if(e) return next(e);
+      list = list.map(function(item){
+        return item.ta;
+      });
+      next(void 0, list);
+    });
+  }],function(e,res){
+    if(e) return next(e);
+    var tofind = {_id:{$not:{$in:res[0].concat(res[1])}}};
+    if(level === "local"){
+      tofind.classroom = self.classroom;
+    }
+    TA.find(tofind).exec(function(e,list){
+      if(e) return next(e);
+      async.each(list,function(item,next){
+        var interaction = new Interaction({
+          student: self.student,
+          ta:item,
+          interactionType: "ignore",
+          subject:self.subject,
+          helpRequest:self._id
+        });
+        interaction.save(next);
+      },next);
+    });
+  });
+};
+
+schema.methods.take = function(ta,next){
+  if(this.state !== "waiting"){
+    if(this.ta === ta._id) return next(void 0, this);
+    return next(new Error("Already Taken"));
+  }
+  console.log(ta);
+  var self = this;
+  this.constructor.findOne({ta:ta._id,state:"taken"},function(e,hr){
+    if(e) return next(e);
+    if(hr) return next(new Error("Already have a help request"));
+    self.ta = ta;
+    self.state = "taken";
+    self.save(function(e){
+      if(e) return next(e);
+      next(void 0, self);
+    });
+  });
+};
+
+schema.methods.cancel = function(next){
+  if(this.state !== "waiting"){
+    return setImmediate(next.bind(next,new Error("Cannot cancel a help request that is not waiting")));
+  }
+  this.state = "canceled";
+  this.save(next);
+};
+
+schema.methods.fail = function(next){
+  if(this.state !== "taken"){
+    return setImmediate(next.bind(next,new Error("Cannot fail an untaken help request")));
+  }
+  var interaction = new Interaction({
+    student: this.student,
+    ta:this.ta,
+    interactionType: "failure",
+    subject:this.subject,
+    helpRequest:this._id
+  });
+  this.state = "waiting";
+  this.ta = null;
+  async.series([
+    this.save.bind(this),
+    interaction.save.bind(interaction)
+  ],next);
+};
+
+
+schema.methods.solve = function(next){
+  if(this.state !== "taken"){
+    return setImmediate(next.bind(next,new Error("Cannot solve an untaken help request")));
+  }
+  this.state = "solved";
+  var interaction = new Interaction({
+    student: this.student,
+    ta:this.ta,
+    interactionType: "success",
+    subject:this.subject,
+    helpRequest:this._id
+  });
+  async.series([
+    this.save.bind(this),
+    interaction.save.bind(interaction)
+  ],next);
+};
+
 
 schema.statics.Permission = function(req,next){
   if(!req.user) return next(false);

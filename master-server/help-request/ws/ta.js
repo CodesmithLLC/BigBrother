@@ -8,7 +8,15 @@ module.exports = function(io){
   var hr_id2to = {};
 
   HelpRequest.schema.post("save",function(help){
-    if(help.state === "waiting") return miniEscalate(help.escalation,help);
+    switch(help.state){
+      case "waiting": return miniEscalate(help.escalation,help);
+      case "taken":
+        io.to(help.escalation==="local"?help.classroom:help.escalation+"-requests")
+          .emit("help-taken",help._id);
+        return io.to(help.ta._id?help.ta._id:help.ta).emit("go-help",help);
+      default:
+        return io.to(help.ta._id?help.ta._id:help.ta).emit("end-help",help);
+    }
   });
 
   function miniEscalate(level,help){
@@ -21,9 +29,9 @@ module.exports = function(io){
       if(level === "admin"){
         return noHelp(help);
       }
-      HelpRequest.update({_id:help._id},{escalation:level},function(e){
+      help.ignore(level,function(e){
         if(e) console.error(e);
-        TA.markIgnore(level,help,function(e){
+        HelpRequest.update({_id:help._id},{escalation:level},function(e){
           if(e) console.error(e);
           return escalate(level === "global"?"admin":"global",help);
         });
@@ -43,31 +51,38 @@ module.exports = function(io){
 
   return function(ws){
     async.waterfall([
-      TA.find.bind(TA,{user:ws.request.user}),
-      function(ta,next){
-        if(arguments.length === 1) return next("didn't find ta");
+      function(next){
+        TA.findOne({user:ws.request.user},function(e,ta){
+          if(e) return next(e);
+          if(!ta) return next("no TA matching "+ws.request.user._id);
+          ws.ta = ta;
+          next();
+        });
+      },
+      function(next){
+        HelpRequest.findTAsCurrent(ws.ta,function(e,cur){
+          if(e) return next(e);
+          if(cur) ws.emit("go-help",cur);
+          else ws.emit("end-help");
+          next();
+        });
+      },
+      function(next){
         ws.join("global-requests");
+        ws.join(ws.ta._id);
 //        ws.join(ta.classroom+"-requests");
         next();
       },
-    ],function(e){
+    ],function(e,ta){
       if(e){
         console.error("Cannot Join Rooms",e);
         return ws.disconnect();
       }
       ws.on("help-take",function(help_id){
-        if(!(help_id in hr_id2to)){
-          return ws.emit("help-taken",help_id);
-        }
-        clearTimeout(hr_id2to[help_id]);
-        delete hr_id2to[help_id];
-        HelpRequest.findByIdAndUpdate(help_id,{$push:{ta:ta._id}, state:"taken"},function(e,help){
-          if(e) console.error(e);
-          ws.broadcast
-            .to(help.escalation==="local"?help.classroom:help.escalation+"-requests")
-            .emit("help-taken",help._id);
-          ws.broadcast.to(help.student).emit("help-taken",help._id);
-          ws.emit("go-help",help._id);
+        HelpRequest.take(help_id,ws.ta,function(e,help){
+          if(e){
+            return console.error("error taking hr: ",e);
+          }
         });
       });
     });

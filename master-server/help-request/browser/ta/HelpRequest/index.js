@@ -5,7 +5,6 @@ var Mustache = require("mustache");
 Mustache.parse(template);
 
 function HelpRequest(help){
-  console.log(help);
   this._id = help._id;
   this.snapshot = help.snapshot;
   this.elem = jQuery(Mustache.render(template,help));

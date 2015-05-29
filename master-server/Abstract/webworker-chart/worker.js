@@ -10,8 +10,16 @@ module.exports = function(self){
   var y_key;
   var name;
   function appendJson2Arrays(json,xari,yari){
-    xari.push(mpath.get(x_key, json));
-    yari.push(mpath.get(y_key, json));
+    var x = mpath.get(x_key, json);
+    var y = mpath.get(y_key, json);
+    if(typeof x === "undefined"){
+      return console.log("x undefined");
+    }
+    if(typeof y === "undefined"){
+      return console.log("y undefined");
+    }
+    xari.push(x);
+    yari.push(y);
   }
 
   var x_data = [];
@@ -50,8 +58,6 @@ module.exports = function(self){
     x_key = e.data.data.x_key;
     y_key = e.data.data.y_key;
     name = e.data.data.name;
-    console.log(url,name);
-
   });
 
 
@@ -60,9 +66,6 @@ module.exports = function(self){
     var ranges = e.data.data;
     async.map(ranges,function(item,next){
       var req = new XMLHttpRequest();
-      console.log(
-        self.location.origin+url+"?min="+item[0]+"&max="+item[1]+"&sort="+x_key
-      );
       req.open("GET", self.location.origin+url+
         "?min="+item[0]+
         "&max="+item[1]+
@@ -71,7 +74,6 @@ module.exports = function(self){
       req.send();
       req.addEventListener("error",next);
       req.addEventListener("load",function(e){
-        console.log(req.response);
         if(req.status !== 200) return;
         var x = [];
         var y = [];
@@ -88,7 +90,6 @@ module.exports = function(self){
         });
         throw err;
       }
-      console.log(items);
       if(items.length === 0) return;
       if(e.data.data.length == 2){
         x_data = items[0][0].concat(x_data).concat(items[1][0]);

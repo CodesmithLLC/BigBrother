@@ -1,0 +1,12 @@
+if currenthelp exists
+-display currenthelp
+else
+-display all requests
+
+When helping
+-hide all requests
+-display current help
+
+When no longer helping
+-Hide current help
+-display all requests

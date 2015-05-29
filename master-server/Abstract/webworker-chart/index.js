@@ -91,8 +91,6 @@ Chart.prototype.addURL =function(url,name){
 
 Chart.prototype.requestRanges = function(requestedRange){
   var requests = [];
-  console.log(requestedRange);
-  console.log(this.curRange);
   if(requestedRange[0] < this.curRange[0]){
     requests.push([requestedRange[0],this.curRange[0]]);
     this.curRange[0] = requestedRange[0];
@@ -112,18 +110,15 @@ Chart.prototype.requestRanges = function(requestedRange){
 
 Chart.prototype.insert = function(name,item){
   var x = mpath.get(this.x_key,item);
-  console.log(name,x);
   var chart = this.chart;
   for(var i=0,l=this.workers.length;i<l;i++){
     if(this.workers[i].name !== name) continue;
     var max = chart.axis.max().x;
-    console.log(chart.zoom(), x, max);
     if(chart.zoom()[1] >= max){
       max = x;
       chart.axis.max({
           x: Date.now()
       });
-      console.log(x,mpath.get(this.y_key,item));
     }
     this.workers[i].worker.postMessage({
       event:"live",

@@ -3,9 +3,15 @@ var fs = require("fs");
 var disc = require("disc");
 var pu = require("path");
 var JSONStream = require("JSONStream");
+var kcode = {};
 
-module.exports = function sendBrowserified(path,res,next){
-  var b = browserify(path)
+module.exports = function sendBrowserified(path,ops,res,next){
+  if(!next){
+    next = res;
+    res = ops;
+    ops = void 0;
+  }
+  var b = browserify(path,ops)
   .transform('brfs') //might use brfs for the templates
   .bundle()
   .on("error",next);

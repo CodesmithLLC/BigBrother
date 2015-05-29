@@ -2,7 +2,7 @@ var HelpRequest = require("../models/HelpRequest");
 
 module.exports = function(io){
   var taWS = require("./ta.js")(io);
-  var stuWS = require("./student.js");
+  var stuWS = require("./student.js")(io);
 
   //we listen for when a new commit is created and re-emmit that out to the cluster emtter
   return function(ws){

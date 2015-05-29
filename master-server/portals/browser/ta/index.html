@@ -3,13 +3,29 @@
 <head>
   <script src="/index.js"></script>
   <style>
-    header ul.menu > li, body > ul{
+    html{width:100%}
+    body{width:90%;padding:5%;margin:0px;}
+    body > * {
+      width:100%
+    }
+    header ul.menu, body > ul {
+      margin:0px;padding:0px;
+    }
+    header ul.menu > li, body > ul > li{
       list-style-type:none;
       display: inline-block;
     }
     .hidden{display:none}
     .hidden-children>*{display:none}
     .shown{display:block}
+    .pages{position:relative;}
+    .pages>*{
+      display:none;
+      width:100%;
+    }
+    .pages>.shown{
+      display:block;
+    }
   </style>
 </head>
 <body>
@@ -20,7 +36,7 @@
       <li><a href="#student-monitor">Student Monitor</a></li>
     </ul>
   </header>
-  <ul class="pages hidden-children">
+  <ul class="pages">
     <li id="student-monitor"></li>
     <li id="help-requests"></li>
   </ul>

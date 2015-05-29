@@ -17,11 +17,9 @@ function StudentList(){
     });
     var live = io(window.location.origin+"/student-monitor");
     live.on("fsdiff",function(diff){
-      console.log("fsdiff",diff);
       studentrefs[diff.student._id||diff.student].chart.insert("File Change",diff);
     });
     live.on("commit",function(diff){
-      console.log("commit");
       studentrefs[diff.student._id||diff.student].chart.insert("Commit",diff);
     });
   });

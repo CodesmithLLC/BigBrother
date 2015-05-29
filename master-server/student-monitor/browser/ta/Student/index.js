@@ -8,7 +8,6 @@ var Mustache = require("mustache");
 Mustache.parse(template);
 
 function Student(student){
-  console.log(student);
   this._id = student._id;
   this.elem = jQuery(Mustache.render(template,student));
   var self = this;
@@ -19,7 +18,6 @@ function Student(student){
     var d = Date.now();
     var min = d - 1000*60*60;
     var ca = res.body.length?res.body[0].createdAt:min;
-    console.log(Math.max(min,ca),min,ca);
     self.chart = new Chart(
       self.elem.find(".chart"),
       "createdAt",
@@ -38,7 +36,7 @@ function Student(student){
     self.chart.addURL("/Student/"+self._id+"/Commit","Commit");
     requestAnimationFrame(function(){
       self.chart.chart.zoom([min,d]);
-    })
+    });
   });
 }
 

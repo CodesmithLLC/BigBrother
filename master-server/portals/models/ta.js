@@ -19,22 +19,5 @@ schema.pre("validate",function(next){
   next();
 });
 
-schema.statics.markIgnore = function(level,help,next){
-  var q = TA.find({semester:help.semester})
-    .where({_id:{$nin:help.ignoredBy.concat(help.ta)}})
-    .where({online:true,current:null});
-  switch(level){
-    case "local":
-      q = q.where({classroom:help.classroom}); break;
-    case "global": break;
-    case "admin": return;
-  }
-  q.update({$inc:{ignores:1}}).select("_id").exec(function(e,docs){
-    if(e) return next(e);
-    help.constructor.where({_id:help._id})
-    .update({$addToSet:{ignoredBy:{$each:docs}}}).exec(next);
-  });
-};
-
 // Change when releasing/ clear DB before
 TA = module.exports = mongoose.model('TeachersAssistant', schema);

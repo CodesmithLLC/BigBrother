@@ -27,3 +27,19 @@ Ta chooses a file in "directory-traverser"
     -we display statistics for that specific file
       -saves+diffs
       -Whether it was included in a commit+diff
+
+
+
+User Makes Help request
+-There is a timeout-"Remove" Help Request
+-The User Can Cancel
+  -"Remove" Help Request
+
+Ta Attempts to Take a Help Request (Race Condition)
+-If first-Let the Ta know, Let the Student know, set it to taken
+-else-They can still take others
+
+TA helps the user
+-User Says they either succeed or fail
+--If fail-Re-imit the Help Request
+--If succeed-"Remove" Help Request
