@@ -10,9 +10,12 @@ module.exports = function(io){
     switch(help.state){
       case "waiting": return miniEscalate(help.escalation,help);
       case "taken":
+        clearTimeout(hr_id2to[help._id]);
+        delete hr_id2to[help._id];
         io.to(help.escalation==="local"?help.classroom:help.escalation+"-requests")
           .emit("help-taken",help._id);
-        return io.to(help.ta._id?help.ta._id:help.ta).emit("go-help",help);
+        io.to(help.ta._id?help.ta._id:help.ta).emit("go-help",help);
+        return;
       default:
         return io.to(help.ta._id?help.ta._id:help.ta).emit("end-help",help);
     }
@@ -41,8 +44,10 @@ module.exports = function(io){
   }
 
   function noHelp(help){
+    delete hr_id2to[help._id];
     console.log("no help1");
-    HelpRequest.update({_id:help._id},{state:"timeout"},function(e){
+    help.state = "timeout";
+    help.save(function(e){
       if(e) console.error(e);
       console.log("no help2");
     });

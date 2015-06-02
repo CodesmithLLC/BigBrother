@@ -121,7 +121,6 @@ schema.methods.take = function(ta,next){
     if(this.ta === ta._id) return next(void 0, this);
     return next(new Error("Already Taken"));
   }
-  console.log(ta);
   var self = this;
   this.constructor.findOne({ta:ta._id,state:"taken"},function(e,hr){
     if(e) return next(e);
@@ -216,7 +215,6 @@ schema.statics.defaultSearch = function(req,next){
 };
 
 schema.virtual('raw').set(function (stream) {
-  console.log("have stream",stream);
   var i = 0;
   var system = {};
   var files = [];

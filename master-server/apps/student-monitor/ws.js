@@ -11,16 +11,18 @@ module.exports = function(io){
       Student.findOne({_id:this.student}, function(err,stu){
         if(err) return console.error(err);
         if(!stu) return console.error("non existing student");
+        console.log("A Save: ", stu.classroom);
         io.to(stu.classroom).emit('fsdiff', diff);
       });
     }
   });
   FSDiff.schema.post("save",function(){
+    console.log("Save: ", this.wasNew);
     if(this.wasNew){
       Student.findOne({_id:diff.student}, function(err,stu){
         if(err) return console.error(err);
         if(!stu) return console.error("non existing student");
-        console.log(stu.classroom);
+        console.log("A Save: ", stu.classroom);
         io.to(stu.classroom).emit('commit', diff);
       });
     }

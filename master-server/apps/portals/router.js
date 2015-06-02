@@ -29,4 +29,19 @@ app.get("/index.js",function(req,res,next){
   next();
 });
 
+app.get("/index.jsx",function(req,res,next){
+  if(!req.user) return next();
+  var roles = req.user.roles;
+  for(var i=0,l=roles.length;i<l;i++){
+    switch(roles[i]){
+      case "student":
+        return sendBrowserified(__dirname+"/browser/student/index.jsx",res,next);
+      case "teachers_assistant":
+        return sendBrowserified(__dirname+"/browser/ta/index.jsx",res,next);
+    }
+  }
+  next();
+});
+
+
 module.exports = app;

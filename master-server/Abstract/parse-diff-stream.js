@@ -54,7 +54,6 @@ var nl = "\n".charCodeAt(0);
 var cr = "\r".charCodeAt(0);
 
 ParseDiffStream.prototype._write = function(chunk,encoding,next){
-  console.log("writing",chunk.toString("utf8"));
   var lastIndex = 0, curstr;
   for(var i=0,l=chunk.length;i<l;i++){
     lastIndex = i;

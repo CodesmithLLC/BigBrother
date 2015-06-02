@@ -57,7 +57,6 @@ schema.statics.defaultCreate = function(req,next){
   mongoose.model("Student").findOne({user:req.user._id}).exec(function(err,doc){
     if(err) return next(err);
     if(!doc) return next(new Error("student doesn't exist"));
-    console.log(doc);
     next(void 0, {student:doc._id});
   });
 };

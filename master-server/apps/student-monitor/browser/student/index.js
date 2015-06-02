@@ -13,6 +13,8 @@ sa.get("/token",function(err,res){
         }
         notified = (notified+1)%10;
         setTimeout(poller,1000);
+      }else{
+        flash("Big Brother and your Student portal are connected");
       }
     });
   };

@@ -19,7 +19,7 @@ module.exports = function(io){
     switch(hr.state){
       case "taken": return io.to(id).emit("help-here");
       case "waiting": return io.to(id).emit("help-aware");
-      default: return io.to(id).emit("help-finish");
+      default: return io.to(id).emit("help-finish",hr.state);
     }
   });
   return function(ws){
