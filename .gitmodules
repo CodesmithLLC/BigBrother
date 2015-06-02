@@ -1,0 +1,6 @@
+[submodule "student-monitor"]
+	path = student-monitor
+	url = git@github.com:CodesmithLLC/BigBrother-Monitor.git
+[submodule "master-server"]
+	path = master-server
+	url = git@github.com:CodesmithLLC/BigBrother-Server.git
