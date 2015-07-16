@@ -1,0 +1,63 @@
+
+
+
+/*
+	Get VPC Tags - http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-tags.html
+		-Of tag "application_name" = {application name}
+			- --filters key=application_name
+			- --filters value={application_name}
+		-Of tag "type" = VPC
+			- --filters resource-type=vpc,
+		-Check if one Exists
+			-Obj.Tags.length === 0
+
+	if Obj.Tags.length > 1
+		-throw new Error
+		-Should never have more than one instance of a VPC running in this use case
+	else if Obj.Tags.length === 1
+		-set VPC_ID = Obj.Tags[0].ResourceId
+	else
+		Create a VPC - http://docs.aws.amazon.com/cli/latest/reference/ec2/create-vpc.html
+			-aws ec2 create-vpc --cidr-block 10.0.0.0/16
+			-set VPC_ID = Obj.Vpc.VpcId
+		Set Tags to find it Later - http://docs.aws.amazon.com/cli/latest/reference/ec2/create-tags.html
+			-aws ec2 create-tags --resources {VPC_ID} --tags 'application_name="{application_name}"'
+*/ We May not need a VPC
+
+
+ServiceList = Get List of Running Instances - http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-list.html
+
+HasNew = false
+HasRemoved = false;
+
+For Each Micro Service
+	-If(Service in ServiceList)
+		-Remove it from ServiceList
+		-Update Service - http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-deploy.html
+			-Set environment_name to Service.name
+	-Else
+		-HasNew = true
+		-Create Service - http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-create.html
+			-Set Region to be the same as everything else
+				- -r region
+			-Specify the type of microprocess that will be run
+				- --envvars SHARDTYPE={type},
+			-Specify the all of the Private IP Addresses that act as Service
+				- --envvars Services={[PRIVATE_IPS]}
+			-Check if it will be private
+				- --tags PRIVATE={is_private}
+				- --vpc.securitygroups - Always add internal TCP
+				- if !Private - add an HTTP Port to 80
+			-Check if it is not going to be load balanced
+				- --single
+
+For All others in ServiceList
+	-HasRemoved = true;
+	-Terminate the Instance-http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-terminate.html
+
+
+ 
+
+if(HasRemoves || HasNew)
+	-Update DNS
+

@@ -1,0 +1,122 @@
+For Every Student
+	-They have many projects
+		-Foreach project
+			-There is a cwd-SNAPSHOT
+
+Whenever a TA is viewing a student
+	-If they are choosing to view a snapshot
+	-Whenever that snapshot has modifications
+	-Notify the TA
+
+
+BigBrother Start
+	-This may be the first time this directory has been handled
+	-There may have been actions after BigBrother Stopped
+		-File Saves-Sync "server filesystem" and local directory
+			-Send tarball?
+				-
+		-Commits-Send Commits diffs that weren't sent before
+	-The Project may not exist on the server
+		-This can be done by documenting what has been added/removed in a local file
+			-it may be too slow if we do a get request
+		-If it doesn't exist send snapshot as tarball
+			-The first one needs to be a commit (considering how we are managing diff synchronization)
+		-We then need to instruct the commit to be considered cwd
+
+File Save
+	-Create a Diff between current commit and current file
+	-Send diff to the server
+		-diff gets applied to "server filesystem"
+
+Git Commit
+	-Create a Diff between last commit and current commit
+	-Send diff to the Server
+		-It should not be applied to "server filesystem"
+			-Only used for documentation purposes
+
+
+It feels as though I'm recreating the wheel
+
+If....
+1) We had a server where...
+  -We have a git repository per student project
+2) every time they added, move, deleted or saved, it sent the change to the server
+    -We make the appropriate changes
+    -We create a commit from that change
+    -We collect statistics
+      -Diff based off last Commit
+      -Diff based off last "Stable" Commit
+  -Every time they make a commit
+    -Create a "Stable" commit
+3) Allow the TA to statically view any of the files
+4) Run a "post commit" script that notifies applicable TAs
+
+Necessities
+  -Would need to create a queue system to prevent multiple commits at the same time
+
+PROS
+  -Clean.
+  -Can base lines add/remove off actual data instead of expected data
+  -Have a backup
+
+CONS
+  -Would store minimal data in the database
+  -Requires heavy use of the Filesystem
+
+Ideally
+
+1) We have two snapshots
+  a) We have a snapshot based called "last commit"
+    -Reference to a user
+    -Reference to a time
+    -Reference to a project
+  b) We have a snapshot based called "current working directory"
+    -Reference to a time
+    -Reference to a user
+    -Reference to a commit
+    -Reference to all diffs applied to it
+    -Current Test Status
+2) Whenever there is a save
+  -We grab a diff, test, etc from the users computer
+  -With the diff
+    a) We gather statistics from it (Num deletes, number of additions, etc)
+    b) We get the "current working directory"
+    c) We get the file from the commit the "current working directory" references
+    d) We apply the diff to the commit file and save it to our "current working directory"
+    e) We notify all TAs of the update
+3) Whenever there is a commit
+  -We update the snapshot's commit reference
+  -It doesn't actually matter
+
+
+Each diff
+  -Reference to the commit
+  -Reference to times
+  -Raw diff
+  -Statistics
+
+
+
+on fs diff
+  -Load Snapshot Metadata
+  -Create Gridfs Readstream (Snapshot location)
+  -Create Gridfs WriteStream (Snapshot location)
+  -Create Diff-Apply Transform (filename,Stream,isTar)
+    -if(isTar){
+      Act as a passthrough
+      When desired File Appears- act as parser
+      When desired file is over - Act as passthrough
+    }
+    Parser
+      -Count the line numbers
+        -When a line to edit appears
+          -if remove - skip that line
+          -while(Current Diff Line is append mode)
+            push the line from the diff
+            increment line number
+            Get next Diff Line
+          Get next Diff Line
+    -read.pipe(transform).pipe(write)
+
+Could also apply a commit....
+  -Good idea? maybe maybe not

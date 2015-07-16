@@ -1,0 +1,23 @@
+For Each Instance
+	-if ! VPC Exists
+		-Create VPC
+		-if load balanced
+			-Create Auto Scaling
+			-create load balancer
+		-else create single ec2 instance
+
+VPC
+	-Create Subnet
+	-Create Internet Conn
+
+Auto Scaling
+	-Increase Alarm - (TYPE Alarm)
+	-Decrease Alarm - (TYPE Alarm)
+	-Notifications - Slack
+	-Specify VPC
+	-Specify Security Groups
+		-Http/Https
+		-ssh
+		-Outbound on any port
+	-Specify Launch Config
+		-Advanced - User Data
